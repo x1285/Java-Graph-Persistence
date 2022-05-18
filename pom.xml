@@ -20,6 +20,7 @@
         <maven.compiler.target>8</maven.compiler.target>
 
         <dep.lombok.version>1.18.24</dep.lombok.version>
+        <dep.junit.version>4.13.2</dep.junit.version>
     </properties>
 
     <dependencyManagement>
@@ -29,6 +30,19 @@
                 <artifactId>lombok</artifactId>
                 <version>${dep.lombok.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <!-- Test dependencies -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${dep.junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>de.x1285</groupId>
+                <artifactId>java-graph-persistence-test-data</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -45,4 +45,9 @@ public abstract class GraphElement {
             throw new IllegalStateException(message);
         }
     }
+
+    @Override
+    public String toString() {
+        return getLabel() + " {id=" + getId() + "}";
+    }
 }

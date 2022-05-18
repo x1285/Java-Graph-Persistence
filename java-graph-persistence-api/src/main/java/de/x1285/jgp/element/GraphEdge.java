@@ -17,7 +17,7 @@ public abstract class GraphEdge<O extends GraphVertex, I extends GraphVertex> ex
 
     @Override
     public String toString() {
-        return "GraphEdge [outVertex="
+        return getLabel() + " [outVertex="
                 + (outVertex != null ? outVertex.getLabel() + "{id=" + outVertex.getId() + "}" : "")
                 + ", inVertex=" + (inVertex != null ? inVertex.getLabel() + "{id=" + inVertex.getId() + "}" : "")
                 + "]";
