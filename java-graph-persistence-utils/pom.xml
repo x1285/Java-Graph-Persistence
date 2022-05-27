@@ -31,7 +31,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.x1285</groupId>
+            <artifactId>java-graph-persistence-test-data</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
