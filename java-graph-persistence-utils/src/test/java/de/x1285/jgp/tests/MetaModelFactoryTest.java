@@ -2,7 +2,9 @@ package de.x1285.jgp.tests;
 
 import de.x1285.jgp.api.annotation.Edge;
 import de.x1285.jgp.api.annotation.Property;
+import de.x1285.jgp.element.GraphVertex;
 import de.x1285.jgp.metamodel.MetaModel;
+import de.x1285.jgp.metamodel.MetaModelException;
 import de.x1285.jgp.metamodel.MetaModelFactory;
 import de.x1285.jgp.metamodel.field.EdgeCollectionField;
 import de.x1285.jgp.metamodel.field.EdgeField;
@@ -13,11 +15,15 @@ import de.x1285.jpg.test.model.Knows;
 import de.x1285.jpg.test.model.Person;
 import de.x1285.jpg.test.model.Place;
 import de.x1285.jpg.test.model.Software;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertThrows;
 
 public class MetaModelFactoryTest {
 
@@ -109,5 +115,18 @@ public class MetaModelFactoryTest {
         Assert.assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
         List<RelevantField<?, ?, ?>> edgeCollections = edges.stream().filter(x -> x instanceof EdgeCollectionField).collect(Collectors.toList());
         Assert.assertEquals(0, edgeCollections.size());
+    }
+
+    @Test
+    public void testInvalidVertexClass() {
+        InvalidVertex invalidVertex = new InvalidVertex();
+        assertThrows(MetaModelException.class, () -> MetaModelFactory.createMetaModel(invalidVertex));
+    }
+
+    @Getter
+    @Setter
+    private static class InvalidVertex extends GraphVertex {
+        @Property
+        private InvalidVertex notAValidProperty;
     }
 }

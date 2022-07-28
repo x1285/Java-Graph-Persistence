@@ -30,13 +30,16 @@ import java.util.stream.Collectors;
 
 public class MetaModelFactory {
 
-    private static HashMap<Class<? extends GraphElement>, List<Field>> CLASS_FIELDS = new HashMap<>();
+    public static final List<Class<?>> SUPPORTED_PROPERTY_TYPES = Arrays.asList(String.class, Character.class, Short.class,
+                                                                                Integer.class, Long.class, Boolean.class, Float.class, Double.class);
 
-    public static MetaModel createMetaModel(GraphElement element) throws MetaModelFactoryException {
+    private static final HashMap<Class<? extends GraphElement>, List<Field>> CLASS_FIELDS = new HashMap<>();
+
+    public static MetaModel createMetaModel(GraphElement element) {
         return createMetaModel(element.getClass());
     }
 
-    public static MetaModel createMetaModel(Class<? extends GraphElement> elementClass) throws MetaModelFactoryException {
+    public static MetaModel createMetaModel(Class<? extends GraphElement> elementClass) {
         List<PropertyDescriptor> pds = preparePropertyDescriptors(elementClass);
         List<RelevantField<?, ?, ?>> relevantFields = createFields(elementClass, pds);
         return new MetaModel(elementClass, relevantFields);
@@ -55,12 +58,13 @@ public class MetaModelFactory {
     }
 
     private static <E extends GraphElement, T> RelevantField<E, T, ? extends Annotation>
-    createField(PropertyDescriptor pd, Class<T> type, Class<E> elementClass) throws MetaModelFactoryException {
+    createField(PropertyDescriptor pd, Class<T> type, Class<E> elementClass) {
         final Field field = getField(pd.getName(), elementClass);
         final Property property = field.getAnnotation(Property.class);
         final Edge edge = field.getAnnotation(Edge.class);
         if (edge != null && property != null) {
-            throw new MetaModelFactoryException("Both annotations ('Property' and 'Edge') found at class " + elementClass.getSimpleName() + " on field " + field.getName());
+            throw new MetaModelException("Both annotations ('Property' and 'Edge') found at class "
+                                                 + elementClass.getSimpleName() + " on field " + field.getName());
         } else if (property != null) {
             return createPropertyField(pd, field, elementClass);
         } else if (edge != null) {
@@ -77,15 +81,17 @@ public class MetaModelFactory {
                 }
             }
             final String message = "Edge field found on non GraphVertex class: " + elementClass.getSimpleName();
-            throw new MetaModelFactoryException(message);
+            throw new MetaModelException(message);
         }
         return null;
     }
 
     private static <E extends GraphVertex, T extends Collection<G>, G>
-    EdgeCollectionField<E, T, G> createEdgeForCollectionField(PropertyDescriptor pd, Edge annotation, Class<T> collectionType, Class<G> genericType,
+    EdgeCollectionField<E, T, G> createEdgeForCollectionField(PropertyDescriptor pd, Edge annotation,
+                                                              Class<T> collectionType, Class<G> genericType,
                                                               Class<E> vertexClass) {
         EdgeCollectionField<E, T, G> edgeField = new EdgeCollectionField<>();
+        edgeField.setFieldName(pd.getName());
         edgeField.setAnnotation(annotation);
         edgeField.setType(collectionType);
         edgeField.setElementClass(vertexClass);
@@ -98,6 +104,7 @@ public class MetaModelFactory {
     private static <E extends GraphVertex, T>
     EdgeField<E, T> createEdgeForVertexField(PropertyDescriptor pd, Edge annotation, Class<T> type, Class<E> vertexClass) {
         EdgeField<E, T> edgeField = new EdgeField<>();
+        edgeField.setFieldName(pd.getName());
         edgeField.setAnnotation(annotation);
         edgeField.setType(type);
         edgeField.setElementClass(vertexClass);
@@ -110,6 +117,7 @@ public class MetaModelFactory {
     EdgeField<E, T> createEdgeField(PropertyDescriptor pd, Edge annotation, Class<T> type, Class<E> vertexClass) {
         // the type parameter is needed for the generics!
         EdgeField<E, T> edgeField = new EdgeField<>();
+        edgeField.setFieldName(pd.getName());
         edgeField.setAnnotation(annotation);
         edgeField.setType(type);
         edgeField.setElementClass(vertexClass);
@@ -120,17 +128,27 @@ public class MetaModelFactory {
         return edgeField;
     }
 
+    // the type parameter is needed for the generics!
     private static <E extends GraphElement, T> PropertyField<E, T>
     createPropertyField(PropertyDescriptor pd, Field field, Class<E> elementClass) {
-        // the type parameter is needed for the generics!
-        //TODO check if field type is supported or mapToJson
+        checkPropertySupport(field, elementClass);
+
         PropertyField<E, T> propertyField = new PropertyField<>();
         Property annotation = field.getAnnotation(Property.class);
         // TODO: 03.05.2022 check that annotation not null
+        propertyField.setFieldName(pd.getName());
         propertyField.setAnnotation(annotation);
         propertyField.setSetter(createSetter(pd, elementClass));
         propertyField.setGetter(createGetter(pd, elementClass));
         return propertyField;
+    }
+
+    private static void checkPropertySupport(Field field, Class<?> elementClass) {
+        if (!SUPPORTED_PROPERTY_TYPES.contains(field.getType())) {
+            final String message = String.format("Unsupported value type %s on field %s of element %s.",
+                                                 field.getType(), field.getName(), elementClass);
+            throw new MetaModelException(message);
+        }
     }
 
     private static Class<?> getFieldsGenericType(Field field, int index) {
@@ -143,27 +161,31 @@ public class MetaModelFactory {
         }
     }
 
-    private static <E extends GraphElement, T> BiConsumer<E, T> createSetter(PropertyDescriptor pd, Class<? extends GraphElement> elementClass) {
+    private static <E extends GraphElement, T> BiConsumer<E, T> createSetter(PropertyDescriptor pd,
+                                                                             Class<? extends GraphElement> elementClass) {
         return (element, value) -> {
             try {
                 pd.getWriteMethod().invoke(element, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("Could not call write method of field " + pd.getName() + " at class " + elementClass.getSimpleName(), e);
+                throw new MetaModelException("Could not call write method of field " + pd.getName() + " at class "
+                                                     + elementClass.getSimpleName(), e);
             }
         };
     }
 
-    private static <E extends GraphElement, T> Function<E, T> createGetter(PropertyDescriptor pd, Class<? extends GraphElement> elementClass) {
+    private static <E extends GraphElement, T> Function<E, T> createGetter(PropertyDescriptor pd,
+                                                                           Class<? extends GraphElement> elementClass) {
         return (element) -> {
             try {
                 return (T) pd.getReadMethod().invoke(element);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("Could not call read method of field " + pd.getName() + " at class " + elementClass.getSimpleName(), e);
+                throw new MetaModelException("Could not call read method of field " + pd.getName() + " at class "
+                                                     + elementClass.getSimpleName(), e);
             }
         };
     }
 
-    protected static List<PropertyDescriptor> preparePropertyDescriptors(final Class<?> type) throws MetaModelFactoryException {
+    protected static List<PropertyDescriptor> preparePropertyDescriptors(final Class<?> type) {
         List<PropertyDescriptor> result = new ArrayList<>();
         try {
             PropertyDescriptor[] descriptors = Introspector.getBeanInfo(type, Object.class).getPropertyDescriptors();
@@ -174,17 +196,17 @@ public class MetaModelFactory {
             }
             return result;
         } catch (IntrospectionException e) {
-            throw new MetaModelFactoryException(e);
+            throw new MetaModelException(e);
         }
     }
 
-    private static <T extends GraphElement> Field getField(String name, Class<T> type) throws MetaModelFactoryException {
+    private static <T extends GraphElement> Field getField(String name, Class<T> type) {
         List<Field> fields = getClassFields(type);
         final List<Field> namedField = fields.stream().filter(f -> name.equals(f.getName())).collect(Collectors.toList());
         if (namedField.size() == 1) {
             return namedField.get(0);
         }
-        throw new MetaModelFactoryException("Could not find field " + name + " at class " + type.getSimpleName());
+        throw new MetaModelException("Could not find field " + name + " at class " + type.getSimpleName());
     }
 
     private static <T extends GraphElement> List<Field> getClassFields(Class<T> type) {
@@ -214,19 +236,5 @@ public class MetaModelFactory {
             }
         }
         return fields;
-    }
-
-    private static class MetaModelFactoryException extends RuntimeException {
-        public MetaModelFactoryException(Throwable e) {
-            super(e);
-        }
-
-        public MetaModelFactoryException(String message, Throwable e) {
-            super(message, e);
-        }
-
-        public MetaModelFactoryException(String message) {
-            super(message);
-        }
     }
 }
