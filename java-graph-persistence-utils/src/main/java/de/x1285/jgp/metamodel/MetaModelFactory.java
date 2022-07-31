@@ -28,10 +28,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MetaModelFactory {
+import static de.x1285.jgp.metamodel.SupportedTypes.isSupportedType;
 
-    public static final List<Class<?>> SUPPORTED_PROPERTY_TYPES = Arrays.asList(String.class, Character.class, Short.class,
-                                                                                Integer.class, Long.class, Boolean.class, Float.class, Double.class);
+public class MetaModelFactory {
 
     private static final HashMap<Class<? extends GraphElement>, List<Field>> CLASS_FIELDS = new HashMap<>();
 
@@ -144,7 +143,7 @@ public class MetaModelFactory {
     }
 
     private static void checkPropertySupport(Field field, Class<?> elementClass) {
-        if (!SUPPORTED_PROPERTY_TYPES.contains(field.getType())) {
+        if (!isSupportedType(field.getType())) {
             final String message = String.format("Unsupported value type %s on field %s of element %s.",
                                                  field.getType(), field.getName(), elementClass);
             throw new MetaModelException(message);
@@ -185,7 +184,7 @@ public class MetaModelFactory {
         };
     }
 
-    protected static List<PropertyDescriptor> preparePropertyDescriptors(final Class<?> type) {
+    private static List<PropertyDescriptor> preparePropertyDescriptors(final Class<?> type) {
         List<PropertyDescriptor> result = new ArrayList<>();
         try {
             PropertyDescriptor[] descriptors = Introspector.getBeanInfo(type, Object.class).getPropertyDescriptors();

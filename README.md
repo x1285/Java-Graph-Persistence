@@ -21,7 +21,7 @@ The implementation is currently in its early beginnings. See more details which 
 - [x] Implement API inclusive Annotations to define how Java POJPs should be stored in the graph database.
 - [x] Implement MetaModel and Factory to access during runtime how instances should be stored in the graph database.
 - [ ] Implement first simple QueryBuilder which auto-generates Gremlin insert queries as string:
-  - [ ] Insert a vertex including all supported properties
+  - [x] Insert a vertex including all supported properties
   - [ ] ... and all other referenced vertices
   - [ ] ... and all referenced edges including their properties
   - [ ] Support inserting a collection of vertices
