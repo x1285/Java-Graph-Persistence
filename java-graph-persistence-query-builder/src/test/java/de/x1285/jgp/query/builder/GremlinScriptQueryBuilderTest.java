@@ -29,10 +29,10 @@ public class GremlinScriptQueryBuilderTest {
         final List<String> result = queryBuilder.add(testElement);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertFalse(result.get(0).contains(".coalesce("));
-        assertTrue(result.get(0).contains("\"name\", \"Marko\""));
-        assertTrue(result.get(0).contains("\"age\", 29"));
+        assertEquals(5, result.size());
+        assertFalse(result.get(4).contains(".coalesce("));
+        assertTrue(result.get(4).contains("\"name\", \"Marko\""));
+        assertTrue(result.get(4).contains("\"age\", 29"));
     }
 
     @Test
@@ -46,11 +46,11 @@ public class GremlinScriptQueryBuilderTest {
         final List<String> result = queryBuilder.add(testElement);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).contains(".coalesce("));
-        assertTrue(result.get(0).contains("T.id, \"" + id + "\""));
-        assertTrue(result.get(0).contains("\"name\", \"Marko\""));
-        assertTrue(result.get(0).contains("\"age\", 29"));
+        assertEquals(5, result.size());
+        assertTrue(result.get(4).contains(".coalesce("));
+        assertTrue(result.get(4).contains("T.id, \"" + id + "\""));
+        assertTrue(result.get(4).contains("\"name\", \"Marko\""));
+        assertTrue(result.get(4).contains("\"age\", 29"));
     }
 
     @Test
