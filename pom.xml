@@ -13,6 +13,7 @@
         <module>java-graph-persistence-api</module>
         <module>java-graph-persistence-query-builder</module>
         <module>java-graph-persistence-utils</module>
+        <module>java-graph-persistence-test-data</module>
     </modules>
 
     <properties>
