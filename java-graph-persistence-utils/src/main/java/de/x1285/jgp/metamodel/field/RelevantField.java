@@ -7,12 +7,13 @@ import de.x1285.jgp.metamodel.MetaModelException;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.annotation.Annotation;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @Getter
 @Setter
-public class RelevantField<E extends GraphElement, T, A> {
+public class RelevantField<E extends GraphElement, T, A extends Annotation> {
 
     protected A annotation;
     protected String fieldName;
@@ -34,7 +35,11 @@ public class RelevantField<E extends GraphElement, T, A> {
 
     @Override
     public String toString() {
-        return annotation.toString();
+        String details = String.format("label=\"%s\"", getLabel());
+        if (annotation instanceof Edge) {
+            details += ", direction=" + ((Edge) annotation).direction().name();
+        }
+        return String.format("@%s(%s)", annotation.annotationType().getName(), details);
     }
 
     private boolean isEmpty(String string) {
