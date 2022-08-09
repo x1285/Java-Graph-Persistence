@@ -3,10 +3,12 @@ package de.x1285.jgp.query.builder;
 import de.x1285.jgp.api.annotation.Property;
 import de.x1285.jgp.element.GraphVertex;
 import de.x1285.jgp.metamodel.MetaModelException;
+import de.x1285.jpg.test.data.TestData;
 import de.x1285.jpg.test.data.TestDataGenerator;
 import de.x1285.jpg.test.model.Person;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
@@ -21,9 +23,25 @@ import static org.junit.Assert.assertTrue;
 public class GremlinScriptQueryBuilderTest {
 
     @Test
+    public void testAddAllElements() {
+        TestData testData = TestDataGenerator.generateTestData();
+
+        final GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
+        final List<String> result = queryBuilder.add(testData.getAllVertices());
+
+        assertNotNull(result);
+        assertEquals(15, result.size());
+        Assert.assertEquals(4, result.stream().filter(x -> x.contains("addV(\"Person\")")).count());
+        Assert.assertEquals(3, result.stream().filter(x -> x.contains("addV(\"Place\")")).count());
+        Assert.assertEquals(2, result.stream().filter(x -> x.contains("addV(\"Software\")")).count());
+        Assert.assertEquals(4, result.stream().filter(x -> x.contains("addE(\"created\")")).count());
+        Assert.assertEquals(2, result.stream().filter(x -> x.contains("addE(\"knows\")")).count());
+    }
+
+    @Test
     public void testAddElementWithoutId() {
-        final List<GraphVertex> testElements = TestDataGenerator.generateTestData();
-        final GraphVertex testElement = testElements.get(0);
+        TestData testData = TestDataGenerator.generateTestData();
+        final GraphVertex testElement = testData.getMarko();
 
         final GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
         final List<String> result = queryBuilder.add(testElement);
@@ -37,8 +55,8 @@ public class GremlinScriptQueryBuilderTest {
 
     @Test
     public void testAddElementWithId() {
-        final List<GraphVertex> testElements = TestDataGenerator.generateTestData();
-        final GraphVertex testElement = testElements.get(0);
+        TestData testData = TestDataGenerator.generateTestData();
+        final GraphVertex testElement = testData.getMarko();
         final String id = UUID.randomUUID().toString();
         testElement.setId(id);
 

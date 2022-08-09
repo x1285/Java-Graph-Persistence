@@ -7,6 +7,7 @@ import de.x1285.jgp.metamodel.MetaModel;
 import de.x1285.jgp.metamodel.MetaModelFactory;
 import de.x1285.jgp.metamodel.field.EdgeField;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +19,10 @@ public class ElementExplorer {
 
     public static Set<? extends GraphElement> collectAllElements(GraphElement element) {
         return collectAllElements(Collections.singleton(element));
+    }
+
+    public static Set<? extends GraphElement> collectAllElements(GraphElement... elements) {
+        return collectAllElements(Arrays.asList(elements));
     }
 
     public static Set<? extends GraphElement> collectAllElements(Collection<? extends GraphElement> elements) {

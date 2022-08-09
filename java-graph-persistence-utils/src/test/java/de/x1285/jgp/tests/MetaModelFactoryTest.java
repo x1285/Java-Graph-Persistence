@@ -3,7 +3,6 @@ package de.x1285.jgp.tests;
 import de.x1285.jgp.api.annotation.Edge;
 import de.x1285.jgp.api.annotation.Property;
 import de.x1285.jgp.element.GraphEdge;
-import de.x1285.jgp.element.GraphElement;
 import de.x1285.jgp.element.GraphVertex;
 import de.x1285.jgp.metamodel.MetaModel;
 import de.x1285.jgp.metamodel.MetaModelException;

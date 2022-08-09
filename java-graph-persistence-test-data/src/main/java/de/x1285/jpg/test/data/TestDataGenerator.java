@@ -1,17 +1,13 @@
 package de.x1285.jpg.test.data;
 
-import de.x1285.jgp.element.GraphVertex;
 import de.x1285.jpg.test.model.Language;
 import de.x1285.jpg.test.model.Person;
 import de.x1285.jpg.test.model.Place;
 import de.x1285.jpg.test.model.Software;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class TestDataGenerator {
 
-    public static List<GraphVertex> generateTestData() {
+    public static TestData generateTestData() {
         final Person marko = Person.builder().name("Marko").age(29).build();
         final Person josh = Person.builder().name("Josh").age(32).build();
         final Person vadas = Person.builder().name("Vadas").age(27).build();
@@ -38,7 +34,17 @@ public class TestDataGenerator {
         final Place duesseldorf = new Place("Düsseldorf");
         peter.setBirthPlace(duesseldorf);
 
-        return Arrays.asList(marko, josh, vadas, peter, lop, ripple);
+        return TestData.builder()
+                       .marko(marko)
+                       .josh(josh)
+                       .vadas(vadas)
+                       .peter(peter)
+                       .lop(lop)
+                       .ripple(ripple)
+                       .berlin(berlin)
+                       .hamburg(hamburg)
+                       .duesseldorf(duesseldorf)
+                       .build();
     }
 
 }

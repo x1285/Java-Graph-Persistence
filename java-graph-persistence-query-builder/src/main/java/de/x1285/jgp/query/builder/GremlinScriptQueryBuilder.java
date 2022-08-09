@@ -18,8 +18,11 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
 
     @Override
     public List<String> add(Collection<? extends GraphElement> elements) {
-        // TODO: 04.05.2022  
-        return null;
+        GremlinScriptQueryBuilderContext context = new GremlinScriptQueryBuilderContext();
+        for (GraphElement element : elements) {
+            add(element, context);
+        }
+        return context.getResult();
     }
 
     @Override
@@ -31,6 +34,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
 
     private void add(GraphElement element, GremlinScriptQueryBuilderContext context) {
         if (!context.wasHandled(element)) {
+            context.addHandled(element);
             final MetaModel metaModel = context.getMetaModel(element);
             if (element instanceof GraphVertex) {
                 addVertex((GraphVertex) element, context, metaModel);

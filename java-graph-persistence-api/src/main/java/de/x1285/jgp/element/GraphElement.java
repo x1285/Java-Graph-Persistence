@@ -1,6 +1,5 @@
 package de.x1285.jgp.element;
 
-import de.x1285.jgp.api.annotation.Property;
 import lombok.Getter;
 import lombok.Setter;
 
