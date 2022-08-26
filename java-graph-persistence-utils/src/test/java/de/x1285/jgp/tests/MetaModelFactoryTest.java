@@ -18,13 +18,15 @@ import de.x1285.jpg.test.model.Place;
 import de.x1285.jpg.test.model.Software;
 import lombok.Getter;
 import lombok.Setter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class MetaModelFactoryTest {
 
@@ -33,17 +35,17 @@ public class MetaModelFactoryTest {
         // Create test data
         MetaModel metaModel = MetaModelFactory.createMetaModel(Person.class);
         List<RelevantField<?, ?, ?>> relevantFields = metaModel.getRelevantFields();
-        Assert.assertEquals(6, relevantFields.size());
+        assertEquals(6, relevantFields.size());
         // test @Property fields
         List<RelevantField<?, ?, ?>> properties = relevantFields.stream().filter(x -> x instanceof PropertyField).collect(Collectors.toList());
-        Assert.assertEquals(2, properties.size());
-        Assert.assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
+        assertEquals(2, properties.size());
+        assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
         // test @Edge fields
         List<RelevantField<?, ?, ?>> edges = relevantFields.stream().filter(x -> x instanceof EdgeField).collect(Collectors.toList());
-        Assert.assertEquals(4, edges.size());
-        Assert.assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
+        assertEquals(4, edges.size());
+        assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
         List<RelevantField<?, ?, ?>> edgeCollections = edges.stream().filter(x -> x instanceof EdgeCollectionField).collect(Collectors.toList());
-        Assert.assertEquals(3, edgeCollections.size());
+        assertEquals(3, edgeCollections.size());
     }
 
     @Test
@@ -51,17 +53,17 @@ public class MetaModelFactoryTest {
         // Create test data
         MetaModel metaModel = MetaModelFactory.createMetaModel(Place.class);
         List<RelevantField<?, ?, ?>> relevantFields = metaModel.getRelevantFields();
-        Assert.assertEquals(1, relevantFields.size());
+        assertEquals(1, relevantFields.size());
         // test @Property fields
         List<RelevantField<?, ?, ?>> properties = relevantFields.stream().filter(x -> x instanceof PropertyField).collect(Collectors.toList());
-        Assert.assertEquals(1, properties.size());
-        Assert.assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
+        assertEquals(1, properties.size());
+        assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
         // test @Edge fields
         List<RelevantField<?, ?, ?>> edges = relevantFields.stream().filter(x -> x instanceof EdgeField).collect(Collectors.toList());
-        Assert.assertEquals(0, edges.size());
-        Assert.assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
+        assertEquals(0, edges.size());
+        assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
         List<RelevantField<?, ?, ?>> edgeCollections = edges.stream().filter(x -> x instanceof EdgeCollectionField).collect(Collectors.toList());
-        Assert.assertEquals(0, edgeCollections.size());
+        assertEquals(0, edgeCollections.size());
     }
 
     @Test
@@ -69,17 +71,17 @@ public class MetaModelFactoryTest {
         // Create test data
         MetaModel metaModel = MetaModelFactory.createMetaModel(Software.class);
         List<RelevantField<?, ?, ?>> relevantFields = metaModel.getRelevantFields();
-        Assert.assertEquals(2, relevantFields.size());
+        assertEquals(2, relevantFields.size());
         // test @Property fields
         List<RelevantField<?, ?, ?>> properties = relevantFields.stream().filter(x -> x instanceof PropertyField).collect(Collectors.toList());
-        Assert.assertEquals(2, properties.size());
-        Assert.assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
+        assertEquals(2, properties.size());
+        assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
         // test @Edge fields
         List<RelevantField<?, ?, ?>> edges = relevantFields.stream().filter(x -> x instanceof EdgeField).collect(Collectors.toList());
-        Assert.assertEquals(0, edges.size());
-        Assert.assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
+        assertEquals(0, edges.size());
+        assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
         List<RelevantField<?, ?, ?>> edgeCollections = edges.stream().filter(x -> x instanceof EdgeCollectionField).collect(Collectors.toList());
-        Assert.assertEquals(0, edgeCollections.size());
+        assertEquals(0, edgeCollections.size());
     }
 
     @Test
@@ -87,17 +89,17 @@ public class MetaModelFactoryTest {
         // Create test data
         MetaModel metaModel = MetaModelFactory.createMetaModel(Knows.class);
         List<RelevantField<?, ?, ?>> relevantFields = metaModel.getRelevantFields();
-        Assert.assertEquals(1, relevantFields.size());
+        assertEquals(1, relevantFields.size());
         // test @Property fields
         List<RelevantField<?, ?, ?>> properties = relevantFields.stream().filter(x -> x instanceof PropertyField).collect(Collectors.toList());
-        Assert.assertEquals(1, properties.size());
-        Assert.assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
+        assertEquals(1, properties.size());
+        assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
         // test @Edge fields
         List<RelevantField<?, ?, ?>> edges = relevantFields.stream().filter(x -> x instanceof EdgeField).collect(Collectors.toList());
-        Assert.assertEquals(0, edges.size());
-        Assert.assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
+        assertEquals(0, edges.size());
+        assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
         List<RelevantField<?, ?, ?>> edgeCollections = edges.stream().filter(x -> x instanceof EdgeCollectionField).collect(Collectors.toList());
-        Assert.assertEquals(0, edgeCollections.size());
+        assertEquals(0, edgeCollections.size());
     }
 
     @Test
@@ -105,17 +107,17 @@ public class MetaModelFactoryTest {
         // Create test data
         MetaModel metaModel = MetaModelFactory.createMetaModel(Created.class);
         List<RelevantField<?, ?, ?>> relevantFields = metaModel.getRelevantFields();
-        Assert.assertEquals(1, relevantFields.size());
+        assertEquals(1, relevantFields.size());
         // test @Property fields
         List<RelevantField<?, ?, ?>> properties = relevantFields.stream().filter(x -> x instanceof PropertyField).collect(Collectors.toList());
-        Assert.assertEquals(1, properties.size());
-        Assert.assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
+        assertEquals(1, properties.size());
+        assertTrue(properties.stream().allMatch(x -> x.getAnnotation() instanceof Property));
         // test @Edge fields
         List<RelevantField<?, ?, ?>> edges = relevantFields.stream().filter(x -> x instanceof EdgeField).collect(Collectors.toList());
-        Assert.assertEquals(0, edges.size());
-        Assert.assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
+        assertEquals(0, edges.size());
+        assertTrue(edges.stream().allMatch(x -> x.getAnnotation() instanceof Edge));
         List<RelevantField<?, ?, ?>> edgeCollections = edges.stream().filter(x -> x instanceof EdgeCollectionField).collect(Collectors.toList());
-        Assert.assertEquals(0, edgeCollections.size());
+        assertEquals(0, edgeCollections.size());
     }
 
     @Test

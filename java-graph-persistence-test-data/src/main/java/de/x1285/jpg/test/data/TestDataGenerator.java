@@ -16,8 +16,8 @@ public class TestDataGenerator {
         final Software ripple = Software.builder().name("ripple").lang(Language.PYHTON).build();
 
         marko.knows(josh).setWeight(1.0);
-        marko.created(lop).setWeight(0.4);
         marko.knows(vadas).setWeight(0.5);
+        marko.created(lop).setWeight(0.4);
 
         josh.created(lop).setWeight(0.4);
         josh.created(ripple).setWeight(1.0);

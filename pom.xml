@@ -21,21 +21,42 @@
         <maven.compiler.target>8</maven.compiler.target>
 
         <dep.lombok.version>1.18.24</dep.lombok.version>
-        <dep.junit.version>4.13.2</dep.junit.version>
+        <dep.junit.version>5.8.1</dep.junit.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>de.x1285</groupId>
+                <artifactId>java-graph-persistence-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.x1285</groupId>
+                <artifactId>java-graph-persistence-query-builder</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.x1285</groupId>
+                <artifactId>java-graph-persistence-utils</artifactId>
+                <version>${project.version}</version>
+
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${dep.lombok.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.tinkerpop</groupId>
+                <artifactId>tinkergraph-gremlin</artifactId>
+                <version>3.6.1</version>
+            </dependency>
+
             <!-- Test dependencies -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
                 <version>${dep.junit.version}</version>
                 <scope>test</scope>
             </dependency>

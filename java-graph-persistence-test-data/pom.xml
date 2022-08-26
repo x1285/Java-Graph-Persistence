@@ -20,7 +20,6 @@
         <dependency>
             <groupId>de.x1285</groupId>
             <artifactId>java-graph-persistence-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,4 +1,4 @@
-package de.x1285.jgp.query.builder;
+package de.x1285.jgp.query.builder.gremlinscript;
 
 import de.x1285.jgp.element.GraphEdge;
 import de.x1285.jgp.element.GraphElement;
@@ -8,16 +8,18 @@ import de.x1285.jgp.metamodel.field.EdgeCollectionField;
 import de.x1285.jgp.metamodel.field.EdgeField;
 import de.x1285.jgp.metamodel.field.PropertyField;
 import de.x1285.jgp.metamodel.field.RelevantField;
+import de.x1285.jgp.query.builder.QueryBuilder;
+import de.x1285.jgp.query.builder.QueryBuilderException;
 
 import java.util.Collection;
 import java.util.List;
 
 import static de.x1285.jgp.metamodel.SupportedTypes.isSupportedType;
 
-public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
+public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQuery>> {
 
     @Override
-    public List<String> add(Collection<? extends GraphElement> elements) {
+    public List<GremlinScriptQuery> add(Collection<? extends GraphElement> elements) {
         GremlinScriptQueryBuilderContext context = new GremlinScriptQueryBuilderContext();
         for (GraphElement element : elements) {
             add(element, context);
@@ -26,7 +28,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
     }
 
     @Override
-    public List<String> add(GraphElement element) {
+    public List<GremlinScriptQuery> add(GraphElement element) {
         GremlinScriptQueryBuilderContext context = new GremlinScriptQueryBuilderContext();
         add(element, context);
         return context.getResult();
@@ -39,15 +41,22 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
             if (element instanceof GraphVertex) {
                 addVertex((GraphVertex) element, context, metaModel);
             } else if (element instanceof GraphEdge) {
-                addEdge((GraphEdge) element, context, metaModel);
+                addEdge((GraphEdge<?, ?>) element, context, metaModel);
             }
         }
     }
 
     private void addVertex(GraphVertex vertex, GremlinScriptQueryBuilderContext context, MetaModel metaModel) {
-        final StringBuilder addQuery = new StringBuilder("addV(\"").append(vertex.getLabel()).append("\")");
+        final String alias = context.generateAlias();
+        final GremlinScriptQuery gremlinScriptQuery = GremlinScriptQuery.of(vertex, alias);
+        context.addToResult(gremlinScriptQuery);
 
-        String idStep = createIdStep(vertex);
+        final StringBuilder addQuery = new StringBuilder("addV(\"").append(vertex.getLabel()).append("\")");
+        addQuery.append(".as(\"")
+                .append(gremlinScriptQuery.getAlias())
+                .append("\")");
+
+        final String idStep = createIdStep(vertex);
         if (idStep != null) {
             addQuery.append(idStep);
         }
@@ -64,15 +73,26 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
         }
 
         if (vertex.getId() == null) {
-            context.addToResult("g." + addQuery);
+            gremlinScriptQuery.setQuery("g." + addQuery);
         } else {
-            final String query = String.format("g.V(%s).fold().coalesce(unfold(), %s)", vertex.getId(), addQuery);
-            context.addToResult(query);
+            final String query = String.format("g.V(%s).fold().coalesce(unfold(), %s).as(\"%s\")",
+                                               vertex.getId(), addQuery, alias);
+            gremlinScriptQuery.setQuery(query);
         }
     }
 
-    private void addEdge(GraphEdge edge, GremlinScriptQueryBuilderContext context, MetaModel metaModel) {
+    private void addEdge(GraphEdge<?, ?> edge, GremlinScriptQueryBuilderContext context, MetaModel metaModel) {
         final StringBuilder addQuery = new StringBuilder("addE(\"").append(edge.getLabel()).append("\")");
+
+        // handle .from and .to
+        prepareAddOutAndInVerticesForEdges(edge, context);
+        final String outVertexAlias = getQueryOrThrow(edge.getOutVertex(), context).getAlias();
+        final String inVertexAlias = getQueryOrThrow(edge.getInVertex(), context).getAlias();
+        addQuery.append(".from(\"")
+                .append(outVertexAlias)
+                .append("\").to(\"")
+                .append(inVertexAlias)
+                .append("\")");
 
         String idStep = createIdStep(edge);
         if (idStep != null) {
@@ -92,14 +112,24 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
             }
         }
 
-        // TODO: 08.08.2022 handle IN and OUT vertex
-
         if (edge.getId() == null) {
-            context.addToResult("g." + addQuery);
+            final GremlinScriptQuery gremlinScriptQuery = GremlinScriptQuery.ofEdge(edge, "g." + addQuery);
+            context.addToResult(gremlinScriptQuery);
         } else {
             final String query = String.format("g.E(%s).fold().coalesce(unfold(), %s)", edge.getId(), addQuery);
-            context.addToResult(query);
+            final GremlinScriptQuery gremlinScriptQuery = GremlinScriptQuery.ofEdge(edge, query);
+            context.addToResult(gremlinScriptQuery);
         }
+    }
+
+    private void prepareAddOutAndInVerticesForEdges(GraphEdge<?, ?> edge, GremlinScriptQueryBuilderContext context) {
+        add(edge.getOutVertex(), context);
+        add(edge.getInVertex(), context);
+    }
+
+    private GremlinScriptQuery getQueryOrThrow(GraphElement element, GremlinScriptQueryBuilderContext context)
+            throws QueryBuilderException {
+        return context.getResultFor(element).orElseThrow(() -> new QueryBuilderException(""));
     }
 
     private void addEdgeCollectionSteps(GraphElement element,
@@ -150,25 +180,25 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<String>> {
     }
 
     @Override
-    public List<String> update(Collection<? extends GraphElement> elements) {
+    public List<GremlinScriptQuery> update(Collection<? extends GraphElement> elements) {
         // TODO: 04.05.2022  
         return null;
     }
 
     @Override
-    public List<String> update(GraphElement element) {
+    public List<GremlinScriptQuery> update(GraphElement element) {
         // TODO: 04.05.2022  
         return null;
     }
 
     @Override
-    public List<String> drop(Collection<? extends GraphElement> elements) {
+    public List<GremlinScriptQuery> drop(Collection<? extends GraphElement> elements) {
         // TODO: 04.05.2022  
         return null;
     }
 
     @Override
-    public List<String> drop(GraphElement element) {
+    public List<GremlinScriptQuery> drop(GraphElement element) {
         // TODO: 04.05.2022
         return null;
     }
