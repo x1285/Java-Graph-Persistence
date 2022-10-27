@@ -15,6 +15,104 @@ elements, which contain all information as requested by the query.
 
 The implementation is currently in its early beginnings. See more details which features to expect at the Roadmap.
 
+## Getting started
+
+Define your entities and their relationships using the annotations provided by our java-graph-persistence-api module. 
+To describe that a vertex entity is connected to another entity, simply annotate that field with ```@Edge```.
+Notice that the framework needs public getter and setter methods to read and write the values of your entities. 
+
+### First simple example
+
+We define a ```Person``` as a vertex. 
+A person can have a property called ```name``` as well as a birthplace.
+
+```java
+@Getter
+@Setter
+public class Person extends GraphVertex {
+
+  @Property
+  private String name;
+
+  @Edge
+  private Place birthPlace;
+
+}
+```
+
+The birthplace is declared as ```Place``` vertex and holds a property ```name```.
+
+```java
+@Getter
+@Setter
+public class Place extends GraphVertex {
+
+  @Property
+  private String name;
+
+}
+```
+
+Instances of these entities can now be used to auto-generate gremlin statements to add these into your graph database.
+
+```java
+    Person myPerson = new Person("Maik");
+    Place myPlace = new Place("Cologne");
+    myPerson.setBirthPlace(myPlace);
+    
+    GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
+    List<GremlinScriptQuery> scriptQueries = queryBuilder.add(myPerson);
+    // use the auto-generated gremlin script queries
+```
+
+The resulting list will contain all needed gremlin scripts to insert ```myPerson```, including all properties, the insertion of ```myPlace``` and the connecting edge between both vertices.
+
+### More advanced example
+
+We are also able to define collections of edges.
+A person for example has visited some places.
+We define a relationship to a List of places using the same ```@Edge``` annotation.
+
+```java
+@Getter
+@Setter
+public class Person extends GraphVertex {
+
+  @Edge
+  private List<Place> visitedPlaces;
+
+}
+```
+
+We could also imagine, that we do not just want to store the raw relationship between persons and places.
+For example, we want to added informations, if the person ```liked``` the ```VisitedPlace```.
+To be able to use edges which store their own properties, we introduced ```GraphEdge```.
+The ```VisitedPlace``` is an edge which will have the property ```liked```.
+
+```java
+@Getter
+@Setter
+public class VisitedPlace extends GraphEdge<Person, Place> {
+
+  @Property
+  private boolean liked;
+
+}
+```
+
+To use that edge, simply use it at the vertex of ```Person``:
+
+```java
+@Getter
+@Setter
+public class Person extends GraphVertex {
+
+  @Edge
+  private List<VisitedPlace> visitedPlaces;
+
+}
+```
+
 ## Roadmap
 
 ### Writing
