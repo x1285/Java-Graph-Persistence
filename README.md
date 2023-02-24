@@ -53,16 +53,45 @@ public class Place extends GraphVertex {
 }
 ```
 
-Instances of these entities can now be used to auto-generate gremlin statements to add these into your graph database.
+#### Autogenerate gremlin queries for executions on a GraphTraversalSource
+Instances of these entities can now be used to auto-generate gremlin statements to add these to your graph database.
 
 ```java
+    // Prepare entities
     Person myPerson = new Person("Maik");
     Place myPlace = new Place("Cologne");
     myPerson.setBirthPlace(myPlace);
+
+    // Generate queries
+    GraphTraversalQueryBuilder queryBuilder = new GraphTraversalQueryBuilder();
+    List<GraphTraversalQuery> traversalQueries = queryBuilder.add(myPerson);
     
+    // use the auto-generated gremlin traversal queries, for example to store them
+    try (final TinkerGraph graph = TinkerGraph.open()){
+        for (GraphTraversalQuery query : traversalQueries){
+            query.execute(graph.traversal()).iterate();
+        }
+    }
+```
+
+#### Autogenerate string based gremlin queries
+Alternatively the entities can also be used to auto-generate the gremlin statements as strings.
+
+```java
+    // Prepare entities
+    Person myPerson = new Person("Maik");
+    Place myPlace = new Place("Cologne");
+    myPerson.setBirthPlace(myPlace);
+
+    // Generate queries
     GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
     List<GremlinScriptQuery> scriptQueries = queryBuilder.add(myPerson);
+    
     // use the auto-generated gremlin script queries
+    System.out.println(result.get(0).getQuery());
+    // >> g.addV("Place").as(<UUID>).property(single, "name", "Cologne")
+    System.out.println(result.get(1).getQuery()); 
+    // >> g.addV("Person").as(<UUID>).property(single, "age", 0).property(single, "name", "Maik")
 ```
 
 The resulting list will contain all needed gremlin scripts to insert ```myPerson```, including all properties, the insertion of ```myPlace``` and the connecting edge between both vertices.
