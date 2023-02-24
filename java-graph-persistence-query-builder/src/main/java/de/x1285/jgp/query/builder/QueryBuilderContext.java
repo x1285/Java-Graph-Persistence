@@ -12,7 +12,11 @@ import java.util.Optional;
 
 public abstract class QueryBuilderContext<Q extends Query> {
 
+    private final AliasGenerator aliasGenerator = new AliasGenerator();
     private final List<Q> result = new ArrayList<>();
+
+    protected final HashSet<GraphElement> stack = new HashSet<>();
+    protected final HashMap<Class<? extends GraphElement>, MetaModel> metaModelCache = new HashMap<>();
 
     public List<Q> getResult() {
         return result;
@@ -29,9 +33,6 @@ public abstract class QueryBuilderContext<Q extends Query> {
     public Optional<Q> getResultFor(GraphElement element) {
         return this.result.stream().filter(q -> q.getElement() == element).findFirst();
     }
-
-    protected final HashSet<GraphElement> stack = new HashSet<>();
-    protected final HashMap<Class<? extends GraphElement>, MetaModel> metaModelCache = new HashMap<>();
 
     public void addHandled(GraphElement graphElement) {
         stack.add(graphElement);
@@ -50,5 +51,9 @@ public abstract class QueryBuilderContext<Q extends Query> {
             metaModelCache.put(element.getClass(), metaModel);
             return metaModel;
         }
+    }
+
+    public String generateAlias() {
+        return aliasGenerator.generateAlias();
     }
 }

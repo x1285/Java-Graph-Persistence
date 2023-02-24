@@ -52,7 +52,8 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
     }
 
     private void addVertex(GraphVertex vertex, GraphTraversalQueryBuilderContext context, MetaModel metaModel) {
-        final GraphTraversalQuery graphTraversalQuery = GraphTraversalQuery.of(vertex);
+        final String alias = context.generateAlias();
+        final GraphTraversalQuery graphTraversalQuery = GraphTraversalQuery.of(vertex, alias);
         context.addToResult(graphTraversalQuery);
 
         Function<GraphTraversalSource, GraphTraversal<?, ?>> query;
@@ -64,6 +65,7 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
             query = g -> g.V(vertex.getId()).fold().coalesce(__.unfold(), addVQuery.apply(__.start()::addV));
             query = query.andThen(g -> g.property(T.id, vertex.getId()));
         }
+        query = query.andThen(g -> g.as(graphTraversalQuery.getAlias()));
         graphTraversalQuery.setQuery(query);
 
         for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
@@ -77,6 +79,7 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
 
     private Function<Function<String, GraphTraversal<?, ?>>, GraphTraversal<?, ?>>
         addVertexAndProperties(GraphVertex vertex, MetaModel metaModel) {
+
         Function<Function<String, GraphTraversal<?, ?>>, GraphTraversal<?, ?>> addVQuery = g -> g.apply(vertex.getLabel());
         for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
             if (relevantField instanceof PropertyField) {
@@ -87,7 +90,20 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
     }
 
     private void addEdge(GraphEdge<?, ?> edge, GraphTraversalQueryBuilderContext context, MetaModel metaModel) {
-       new QueryBuilderException("Not implemented yet");
+        prepareAddOutAndInVerticesForEdges(edge, context);
+        final String outVertexAlias = getQueryOrThrow(edge.getOutVertex(), context).getAlias();
+        final String inVertexAlias = getQueryOrThrow(edge.getInVertex(), context).getAlias();
+        // TODO: 24.02.2023 create and addE query;
+    }
+
+    private void prepareAddOutAndInVerticesForEdges(GraphEdge<?, ?> edge, GraphTraversalQueryBuilderContext context) {
+        add(edge.getOutVertex(), context);
+        add(edge.getInVertex(), context);
+    }
+
+    private GraphTraversalQuery getQueryOrThrow(GraphElement element, GraphTraversalQueryBuilderContext context)
+            throws QueryBuilderException {
+        return context.getResultFor(element).orElseThrow(() -> new QueryBuilderException(""));
     }
 
     private void addEdgeCollectionSteps(GraphElement element,

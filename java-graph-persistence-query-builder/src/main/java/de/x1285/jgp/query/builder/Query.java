@@ -17,6 +17,9 @@ public abstract class Query<R> {
     protected final GraphElement element;
 
     @Getter
+    private String alias;
+
+    @Getter
     @Setter
     protected R query;
 
