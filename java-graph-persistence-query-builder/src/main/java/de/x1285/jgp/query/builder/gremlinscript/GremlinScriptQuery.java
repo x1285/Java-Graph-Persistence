@@ -2,25 +2,15 @@ package de.x1285.jgp.query.builder.gremlinscript;
 
 import de.x1285.jgp.element.GraphEdge;
 import de.x1285.jgp.element.GraphElement;
-import de.x1285.jgp.element.GraphVertex;
-import lombok.Builder;
+import de.x1285.jgp.query.builder.Query;
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@Builder
-public class GremlinScriptQuery {
-
-    @Getter
-    @NonNull
-    private final GraphElement element;
+@SuperBuilder
+public class GremlinScriptQuery extends Query<String> {
 
     @Getter
     private final String alias;
-
-    @Getter
-    @Setter
-    private String query;
 
     public static GremlinScriptQuery of(GraphElement element, String query, String alias) {
         return GremlinScriptQuery.builder()
@@ -44,12 +34,8 @@ public class GremlinScriptQuery {
                                  .build();
     }
 
-    public boolean isVertex() {
-        return element instanceof GraphVertex;
-    }
-
     @Override
     public String toString() {
-        return "GremlinScriptQuery{element.label='" + element.getLabel() + '\'' + ", query=" + query + '}';
+        return "GremlinScriptQuery{element.label='" + element.getLabel() + "', query='" + query + "'}";
     }
 }

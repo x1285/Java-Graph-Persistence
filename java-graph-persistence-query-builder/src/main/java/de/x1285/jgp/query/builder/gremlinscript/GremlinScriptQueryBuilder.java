@@ -14,8 +14,6 @@ import de.x1285.jgp.query.builder.QueryBuilderException;
 import java.util.Collection;
 import java.util.List;
 
-import static de.x1285.jgp.metamodel.SupportedTypes.isSupportedType;
-
 public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQuery>> {
 
     @Override
@@ -207,40 +205,5 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         final String label = relevantField.getLabel();
         final Object value = getValue(element, relevantField);
         return String.format(".property(single, \"%s\", %s)", label, value);
-    }
-
-    private Object getValue(GraphElement element, RelevantField<? extends GraphElement, ?, ?> relevantField) {
-        Object value = relevantField.getGetter().apply(element);
-        checkValueSupport(value, element, relevantField);
-        return getValue(value);
-    }
-
-    private Object getValue(Object value) {
-        if (value instanceof String) {
-            value = "\"" + ((String) value).replace("\"", "\\\"") + "\"";
-        } else if (value instanceof Double) {
-            value += "d";
-        } else if (value instanceof Long) {
-            value += "L";
-        } else if (value instanceof Enum) {
-            value = "\"" + ((Enum<?>) value).name() + "\"";
-        }
-        return value;
-    }
-
-    private void checkValueSupport(Object value, GraphElement element, RelevantField<? extends GraphElement, ?, ?> field) {
-        if (value != null && !isSupportedType(value.getClass())) {
-            final String message = String.format("Unsupported value type %s on field %s of element %s.",
-                                                 value.getClass(), field, element.getClass());
-            throw new QueryBuilderException(message);
-        }
-    }
-
-    private void checkIdValueSupport(Object value, GraphElement element) {
-        if (value != null && !isSupportedType(value.getClass())) {
-            final String message = String.format("Unsupported value type %s on Id field of element %s.",
-                                                 value.getClass(), element.getClass());
-            throw new QueryBuilderException(message);
-        }
     }
 }

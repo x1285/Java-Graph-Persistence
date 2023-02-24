@@ -1,4 +1,4 @@
-package de.x1285.jgp.query.builder.gremlinscript;
+package de.x1285.jgp.query.builder.tinkerpop;
 
 import de.x1285.jgp.api.annotation.Property;
 import de.x1285.jgp.element.GraphVertex;
@@ -21,21 +21,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-;
-
-public class GremlinScriptQueryBuilderTest {
+class GraphTraversalQueryBuilderTest {
 
     @Test
     public void testAddAllElements() {
         TestData testData = TestDataGenerator.generateTestData();
 
-        final GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
-        final List<GremlinScriptQuery> result = queryBuilder.add(testData.getAllVertices());
+        final GraphTraversalQueryBuilder queryBuilder = new GraphTraversalQueryBuilder();
+        final List<GraphTraversalQuery> result = queryBuilder.add(testData.getAllVertices());
 
         assertNotNull(result);
         assertEquals(15, result.size());
 
-        final List<String> queries = result.stream().map(GremlinScriptQuery::getQuery).collect(Collectors.toList());
+        final List<String> queries = result.stream().map(GraphTraversalQuery::toGremlinScript).collect(Collectors.toList());
         assertEquals(4, queries.stream().filter(x -> x.contains("addV(\"Person\")")).count());
         assertEquals(3, queries.stream().filter(x -> x.contains("addV(\"Place\")")).count());
         assertEquals(2, queries.stream().filter(x -> x.contains("addV(\"Software\")")).count());
@@ -48,15 +46,15 @@ public class GremlinScriptQueryBuilderTest {
         TestData testData = TestDataGenerator.generateTestData();
         final GraphVertex testElementMarko = testData.getMarko();
 
-        final GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
-        final List<GremlinScriptQuery> result = queryBuilder.add(testElementMarko);
+        final GraphTraversalQueryBuilder queryBuilder = new GraphTraversalQueryBuilder();
+        final List<GraphTraversalQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
         assertEquals(12, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)
-                                                     .map(GremlinScriptQuery::getQuery)
+                                                     .map(GraphTraversalQuery::toGremlinScript)
                                                      .findFirst();
         assertTrue(addQueryMarko.isPresent());
         assertFalse(addQueryMarko.get().contains(".coalesce("));
@@ -71,15 +69,15 @@ public class GremlinScriptQueryBuilderTest {
         final String id = UUID.randomUUID().toString();
         testElementMarko.setId(id);
 
-        final GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
-        final List<GremlinScriptQuery> result = queryBuilder.add(testElementMarko);
+        final GraphTraversalQueryBuilder queryBuilder = new GraphTraversalQueryBuilder();
+        final List<GraphTraversalQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
         assertEquals(12, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)
-                                                     .map(GremlinScriptQuery::getQuery)
+                                                     .map(GraphTraversalQuery::toGremlinScript)
                                                      .findFirst();
         assertTrue(addQueryMarko.isPresent());
         assertTrue(addQueryMarko.get().contains(".coalesce("));
@@ -89,13 +87,13 @@ public class GremlinScriptQueryBuilderTest {
     }
 
     @Test
-    public void testNullPropertyDoesNotThrow() {
+    public void testNullPropertyDoesNotThrowException() {
         // create vertex with a null property: Person.name = null.
         final Person person = Person.builder().age(12).build();
         person.setName(null);
 
-        final GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
-        final List<GremlinScriptQuery> result = queryBuilder.add(person);
+        final GraphTraversalQueryBuilder queryBuilder = new GraphTraversalQueryBuilder();
+        final List<GraphTraversalQuery> result = queryBuilder.add(person);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -103,10 +101,10 @@ public class GremlinScriptQueryBuilderTest {
 
     @Test
     public void testAddUnsupportedPropertyDoesThrow() {
-        InvalidVertex invalidVertex = new InvalidVertex();
-        invalidVertex.setNotAValidProperty(new InvalidVertex());
+        GraphTraversalQueryBuilderTest.InvalidVertex invalidVertex = new GraphTraversalQueryBuilderTest.InvalidVertex();
+        invalidVertex.setNotAValidProperty(new GraphTraversalQueryBuilderTest.InvalidVertex());
 
-        final GremlinScriptQueryBuilder queryBuilder = new GremlinScriptQueryBuilder();
+        final GraphTraversalQueryBuilder queryBuilder = new GraphTraversalQueryBuilder();
         assertThrows(MetaModelException.class, () -> queryBuilder.add(invalidVertex));
     }
 
@@ -116,5 +114,4 @@ public class GremlinScriptQueryBuilderTest {
         @Property
         private Object notAValidProperty;
     }
-
 }

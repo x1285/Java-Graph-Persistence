@@ -1,8 +1,11 @@
 package de.x1285.jgp.query.builder;
 
 import de.x1285.jgp.element.GraphElement;
+import de.x1285.jgp.metamodel.field.RelevantField;
 
 import java.util.Collection;
+
+import static de.x1285.jgp.metamodel.SupportedTypes.isSupportedType;
 
 public abstract class QueryBuilder<R> {
 
@@ -48,5 +51,40 @@ public abstract class QueryBuilder<R> {
     public abstract R drop(Collection<? extends GraphElement> elements);
 
     public abstract R drop(GraphElement element);
+
+    protected void checkIdValueSupport(Object value, GraphElement element) {
+        if (value != null && !isSupportedType(value.getClass())) {
+            final String message = String.format("Unsupported value type %s on Id field of element %s.",
+                                                 value.getClass(), element.getClass());
+            throw new QueryBuilderException(message);
+        }
+    }
+
+    protected Object getValue(GraphElement element, RelevantField<? extends GraphElement, ?, ?> relevantField) {
+        Object value = relevantField.getGetter().apply(element);
+        checkValueSupport(value, element, relevantField);
+        return getValue(value);
+    }
+
+    protected Object getValue(Object value) {
+        if (value instanceof String) {
+            value = "\"" + ((String) value).replace("\"", "\\\"") + "\"";
+        } else if (value instanceof Double) {
+            value += "d";
+        } else if (value instanceof Long) {
+            value += "L";
+        } else if (value instanceof Enum) {
+            value = "\"" + ((Enum<?>) value).name() + "\"";
+        }
+        return value;
+    }
+
+    private void checkValueSupport(Object value, GraphElement element, RelevantField<? extends GraphElement, ?, ?> field) {
+        if (value != null && !isSupportedType(value.getClass())) {
+            final String message = String.format("Unsupported value type %s on field %s of element %s.",
+                                                 value.getClass(), field, element.getClass());
+            throw new QueryBuilderException(message);
+        }
+    }
 
 }

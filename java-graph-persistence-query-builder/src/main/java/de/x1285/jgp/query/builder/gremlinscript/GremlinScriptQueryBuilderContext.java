@@ -1,15 +1,12 @@
 package de.x1285.jgp.query.builder.gremlinscript;
 
 import de.x1285.jgp.element.GraphElement;
-import de.x1285.jgp.element.GraphVertex;
 import de.x1285.jgp.query.builder.AliasGenerator;
 import de.x1285.jgp.query.builder.QueryBuilderContext;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class GremlinScriptQueryBuilderContext extends QueryBuilderContext {
 
@@ -27,10 +24,6 @@ public class GremlinScriptQueryBuilderContext extends QueryBuilderContext {
         } else {
             result.add(gremlinScriptQuery);
         }
-    }
-
-    public void addToResult(Collection<GremlinScriptQuery> gremlinScriptQuery) {
-        result.addAll(gremlinScriptQuery);
     }
 
     public Optional<GremlinScriptQuery> getResultFor(GraphElement element) {
