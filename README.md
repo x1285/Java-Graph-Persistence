@@ -155,7 +155,7 @@ public class Person extends GraphVertex {
 - [x] Implement first simple QueryBuilder which auto-generates Gremlin insert queries for GraphTraversals:
   - [x] Insert a vertex including all supported properties
   - [x] ... and all other referenced vertices
-  - [ ] ... and all referenced edges including their properties
+  - [x] ... and all referenced edges including their properties
   - [ ] Support inserting a collection of vertices
 
 ### Reading

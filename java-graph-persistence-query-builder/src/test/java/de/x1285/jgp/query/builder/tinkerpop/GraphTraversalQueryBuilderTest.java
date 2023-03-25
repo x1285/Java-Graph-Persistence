@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GraphTraversalQueryBuilderTest {
+public class GraphTraversalQueryBuilderTest {
 
     @Test
     public void testAddAllElements() {
@@ -31,7 +31,7 @@ class GraphTraversalQueryBuilderTest {
         final List<GraphTraversalQuery> result = queryBuilder.add(testData.getAllVertices());
 
         assertNotNull(result);
-        assertEquals(15, result.size());
+        assertEquals(19, result.size());
 
         final List<String> queries = result.stream().map(GraphTraversalQuery::toGremlinScript).collect(Collectors.toList());
         assertEquals(4, queries.stream().filter(x -> x.contains("addV(\"Person\")")).count());
@@ -50,7 +50,7 @@ class GraphTraversalQueryBuilderTest {
         final List<GraphTraversalQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(12, result.size());
+        assertEquals(15, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)
@@ -58,8 +58,8 @@ class GraphTraversalQueryBuilderTest {
                                                      .findFirst();
         assertTrue(addQueryMarko.isPresent());
         assertFalse(addQueryMarko.get().contains(".coalesce("));
-        assertTrue(addQueryMarko.get().contains("\"name\", \"Marko\""));
-        assertTrue(addQueryMarko.get().contains("\"age\", 29"));
+        assertTrue(addQueryMarko.get().contains("\"name\",'\"Marko\"'"));
+        assertTrue(addQueryMarko.get().contains("\"age\",29"));
     }
 
     @Test
@@ -73,7 +73,7 @@ class GraphTraversalQueryBuilderTest {
         final List<GraphTraversalQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(12, result.size());
+        assertEquals(15, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)
@@ -81,9 +81,9 @@ class GraphTraversalQueryBuilderTest {
                                                      .findFirst();
         assertTrue(addQueryMarko.isPresent());
         assertTrue(addQueryMarko.get().contains(".coalesce("));
-        assertTrue(addQueryMarko.get().contains("T.id, \"" + id + "\""));
-        assertTrue(addQueryMarko.get().contains("\"name\", \"Marko\""));
-        assertTrue(addQueryMarko.get().contains("\"age\", 29"));
+        assertTrue(addQueryMarko.get().contains("T.id,\"" + id + "\""));
+        assertTrue(addQueryMarko.get().contains("\"name\",'\"Marko\"'"));
+        assertTrue(addQueryMarko.get().contains("\"age\",29"));
     }
 
     @Test

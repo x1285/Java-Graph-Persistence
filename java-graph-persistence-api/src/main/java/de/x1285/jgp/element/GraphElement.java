@@ -9,7 +9,7 @@ public abstract class GraphElement {
 
     @Getter
     @Setter
-    private String id;
+    private Object id;
 
     public String getLabel() {
         return this.getClass().getSimpleName();
@@ -31,7 +31,7 @@ public abstract class GraphElement {
     @Override
     public int hashCode() {
         if (id != null) {
-            return Objects.hash(id);
+            return Objects.hashCode(id);
         }
         return super.hashCode();
     }

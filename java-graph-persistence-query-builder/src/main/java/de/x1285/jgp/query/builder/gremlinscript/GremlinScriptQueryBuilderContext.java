@@ -3,17 +3,9 @@ package de.x1285.jgp.query.builder.gremlinscript;
 import de.x1285.jgp.element.GraphElement;
 import de.x1285.jgp.query.builder.QueryBuilderContext;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class GremlinScriptQueryBuilderContext extends QueryBuilderContext {
-
-    private final List<GremlinScriptQuery> result = new ArrayList<>();
-
-    public List<GremlinScriptQuery> getResult() {
-        return result;
-    }
+public class GremlinScriptQueryBuilderContext extends QueryBuilderContext<GremlinScriptQuery> {
 
     public void addToResult(GremlinScriptQuery gremlinScriptQuery) {
         if (gremlinScriptQuery.isVertex()) {

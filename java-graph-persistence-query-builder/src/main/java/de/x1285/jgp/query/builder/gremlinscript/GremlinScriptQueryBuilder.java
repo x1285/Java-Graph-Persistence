@@ -34,7 +34,6 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
 
     private void add(GraphElement element, GremlinScriptQueryBuilderContext context) {
         if (!context.wasHandled(element)) {
-            context.addHandled(element);
             final MetaModel metaModel = context.getMetaModel(element);
             if (element instanceof GraphVertex) {
                 addVertex((GraphVertex) element, context, metaModel);
@@ -169,7 +168,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
     }
 
     private String createIdStep(GraphElement element) {
-        String id = element.getId();
+        Object id = element.getId();
         if (id != null) {
             checkIdValueSupport(id, element);
             return String.format(".property(T.id, %s)", getValue(id));

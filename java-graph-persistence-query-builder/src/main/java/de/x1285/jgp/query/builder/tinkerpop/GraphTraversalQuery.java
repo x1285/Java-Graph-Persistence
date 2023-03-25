@@ -13,8 +13,11 @@ import java.util.function.Function;
 @SuperBuilder
 public class GraphTraversalQuery extends Query<Function<GraphTraversalSource, GraphTraversal<?, ?>>> {
 
-    public GraphTraversal<?, ?> execute(GraphTraversalSource g) {
-        return query.apply(g);
+    public void execute(GraphTraversalSource g) {
+        Object id = query.apply(g).next();
+        if (id != null) {
+            element.setId(id);
+        }
     }
 
     public static GraphTraversalQuery of(GraphVertex vertex, String alias) {

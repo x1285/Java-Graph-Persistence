@@ -15,12 +15,12 @@ public class EdgeCollectionField<E extends GraphVertex, T extends Collection<G>,
 
     @Override
     public Class<?> getOutType() {
-        return getAnnotation().direction() == EdgeDirection.OUT ? getElementClass() : genericType;
+        return getDirection() == EdgeDirection.OUT ? getElementClass() : genericType;
     }
 
     @Override
     public Class<?> getInType() {
-        return getAnnotation().direction() == EdgeDirection.IN ? getElementClass() : genericType;
+        return getDirection() == EdgeDirection.IN ? getElementClass() : genericType;
     }
 
 }

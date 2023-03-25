@@ -13,12 +13,16 @@ public class EdgeField<E extends GraphVertex, T> extends RelevantField<E, T, Edg
     private Class<E> elementClass;
     private Class<T> type;
 
+    public EdgeDirection getDirection() {
+        return getAnnotation().direction();
+    }
+
     public Class<?> getOutType() {
-        return getAnnotation().direction() == EdgeDirection.OUT ? elementClass : type;
+        return getDirection() == EdgeDirection.OUT ? elementClass : type;
     }
 
     public Class<?> getInType() {
-        return getAnnotation().direction() == EdgeDirection.IN ? elementClass : type;
+        return getDirection() == EdgeDirection.IN ? elementClass : type;
     }
 
 }
