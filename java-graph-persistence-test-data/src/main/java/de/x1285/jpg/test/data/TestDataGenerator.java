@@ -12,28 +12,32 @@ public class TestDataGenerator {
         final Person josh = Person.builder().name("Josh").age(32).build();
         final Person vadas = Person.builder().name("Vadas").age(27).build();
         final Person peter = Person.builder().name("Peter").age(35).build();
+
         final Software lop = Software.builder().name("lop").lang(Language.JAVA).build();
         final Software ripple = Software.builder().name("ripple").lang(Language.PYHTON).build();
+
+        final Place duesseldorf = new Place("Düsseldorf");
+        final Place hamburg = new Place("Hamburg");
+        final Place berlin = new Place("Berlin");
 
         marko.knows(josh).setWeight(1.0);
         marko.knows(vadas).setWeight(0.5);
         marko.created(lop).setWeight(0.4);
+        marko.setBirthPlace(berlin);
+        marko.visitedPlace(hamburg);
+        marko.visitedPlace(duesseldorf);
 
         josh.created(lop).setWeight(0.4);
         josh.created(ripple).setWeight(1.0);
-
-        peter.created(lop).setWeight(0.2);
-
-        final Place berlin = new Place("Berlin");
-        marko.setBirthPlace(berlin);
         josh.setBirthPlace(berlin);
 
-        final Place hamburg = new Place("Hamburg");
-        vadas.setBirthPlace(hamburg);
-        vadas.knows(josh);
-
-        final Place duesseldorf = new Place("Düsseldorf");
+        peter.created(lop).setWeight(0.2);
         peter.setBirthPlace(duesseldorf);
+
+        vadas.setBirthPlace(hamburg);
+        vadas.visitedPlace(berlin);
+        vadas.visitedPlace(duesseldorf);
+        vadas.knows(josh);
 
         return TestData.builder()
                        .marko(marko)

@@ -63,20 +63,7 @@ public abstract class QueryBuilder<R> {
     protected Object getValue(GraphElement element, RelevantField<? extends GraphElement, ?, ?> relevantField) {
         Object value = relevantField.getGetter().apply(element);
         checkValueSupport(value, element, relevantField);
-        return getValue(value);
-    }
-
-    protected Object getValue(Object value) {
-        if (value instanceof String) {
-            value = "\"" + ((String) value).replace("\"", "\\\"") + "\"";
-        } else if (value instanceof Double) {
-            value += "d";
-        } else if (value instanceof Long) {
-            value += "L";
-        } else if (value instanceof Enum) {
-            value = "\"" + ((Enum<?>) value).name() + "\"";
-        }
-        return value;
+        return transformValue(value);
     }
 
     private void checkValueSupport(Object value, GraphElement element, RelevantField<? extends GraphElement, ?, ?> field) {
@@ -87,4 +74,5 @@ public abstract class QueryBuilder<R> {
         }
     }
 
+    protected abstract Object transformValue(Object value);
 }

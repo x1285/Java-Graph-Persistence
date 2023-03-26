@@ -142,20 +142,18 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
                 () -> new QueryBuilderException("Internal error: Required parental query for element not found."));
     }
 
-    private void addEdgeCollectionSteps(GraphElement element,
+    private void addEdgeCollectionSteps(GraphVertex vertex,
                                         EdgeCollectionField<?, ?, ?> edgeCollectionField,
                                         GraphTraversalQueryBuilderContext context) {
-        Collection<?> values = edgeCollectionField.getGetter().apply(element);
-        if (values != null) {
-            for (Object value : values) {
-                if (value != null) {
-                    if (value instanceof GraphElement) {
-                        add((GraphElement) value, context);
-                    } else {
-                        String message = String.format("Unsupported type %s declared in edge collection at element %s (field %s)",
-                                                       value.getClass(), element.getClass(), edgeCollectionField.getFieldName());
-                        throw new QueryBuilderException(message);
-                    }
+        Collection<?> graphElements = edgeCollectionField.getGetter().apply(vertex);
+        if (graphElements != null) {
+            for (Object graphElement : graphElements) {
+                if (graphElement instanceof GraphElement) {
+                    addEdgeOfVertexToGraphElement(vertex, (GraphElement) graphElement, edgeCollectionField, context);
+                } else {
+                    String message = String.format("Unsupported type %s declared in edge collection at element %s (field %s)",
+                                                   graphElement.getClass(), edgeCollectionField.getClass(), edgeCollectionField.getFieldName());
+                    throw new QueryBuilderException(message);
                 }
             }
         }
@@ -164,23 +162,31 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
     private void addEdgeSteps(GraphVertex vertex,
                               EdgeField<?, ?> edgeField,
                               GraphTraversalQueryBuilderContext context) {
-        Object value = edgeField.getGetter().apply(vertex);
-        if (value != null) {
-            if (value instanceof GraphVertex) {
-                GraphVertex oppositeElement = (GraphVertex) value;
-                add(oppositeElement, context);
+        Object graphElement = edgeField.getGetter().apply(vertex);
+        if (graphElement instanceof GraphElement) {
+            addEdgeOfVertexToGraphElement(vertex, (GraphElement) graphElement, edgeField, context);
+        } else if (graphElement != null) {
+            String message = String.format("Unsupported type %s declared as edge at vertex %s (field %s)",
+                                           graphElement.getClass(), vertex.getClass(), edgeField.getFieldName());
+            throw new QueryBuilderException(message);
+        }
+    }
 
-                GraphVertex outVertex = edgeField.getDirection() == EdgeDirection.OUT ? vertex : oppositeElement;
-                GraphVertex inVertex = edgeField.getDirection() == EdgeDirection.OUT ? oppositeElement : vertex;
-                SimpleGraphEdge<?, ?> edgeElement = new SimpleGraphEdge<>(edgeField.getLabel(), outVertex, inVertex);
-                add(edgeElement, context);
-            } else if (value instanceof GraphEdge) {
-                add((GraphEdge<?, ?>) value, context);
-            } else {
-                String message = String.format("Unsupported type %s declared as edge at vertex %s (field %s)",
-                                               value.getClass(), vertex.getClass(), edgeField.getFieldName());
-                throw new QueryBuilderException(message);
-            }
+    private void addEdgeOfVertexToGraphElement(GraphVertex vertex, GraphElement graphElement, EdgeField<?, ?> edgeField, GraphTraversalQueryBuilderContext context) {
+        if (graphElement instanceof GraphVertex) {
+            GraphVertex oppositeElement = (GraphVertex) graphElement;
+            add(oppositeElement, context);
+
+            GraphVertex outVertex = edgeField.getDirection() == EdgeDirection.OUT ? vertex : oppositeElement;
+            GraphVertex inVertex = edgeField.getDirection() == EdgeDirection.OUT ? oppositeElement : vertex;
+            SimpleGraphEdge<?, ?> edgeElement = new SimpleGraphEdge<>(edgeField.getLabel(), outVertex, inVertex);
+            add(edgeElement, context);
+        } else if (graphElement instanceof GraphEdge) {
+            add(graphElement, context);
+        } else if (graphElement != null) {
+            String message = String.format("Unsupported type %s declared as edge at vertex %s (field %s)",
+                                           graphElement.getClass(), vertex.getClass(), edgeField.getFieldName());
+            throw new QueryBuilderException(message);
         }
     }
 
@@ -215,5 +221,10 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
             final Object value = getValue(element, relevantField);
             return g.property(single, label, value);
         };
+    }
+
+    @Override
+    protected Object transformValue(Object value) {
+        return value;
     }
 }

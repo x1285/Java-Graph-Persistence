@@ -50,7 +50,7 @@ public class GremlinScriptQueryBuilderTest {
         final List<GremlinScriptQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(13, result.size());
+        assertEquals(14, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)
@@ -73,7 +73,7 @@ public class GremlinScriptQueryBuilderTest {
         final List<GremlinScriptQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(13, result.size());
+        assertEquals(14, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)

@@ -69,7 +69,7 @@ Instances of these entities can now be used to auto-generate gremlin statements 
     // use the auto-generated gremlin traversal queries, for example to store them
     try (final TinkerGraph graph = TinkerGraph.open()){
         for (GraphTraversalQuery query : traversalQueries){
-            query.execute(graph.traversal()).iterate();
+            query.execute(graph.traversal());
         }
     }
 ```

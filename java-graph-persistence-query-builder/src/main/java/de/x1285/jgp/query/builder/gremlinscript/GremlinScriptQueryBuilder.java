@@ -171,7 +171,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         Object id = element.getId();
         if (id != null) {
             checkIdValueSupport(id, element);
-            return String.format(".property(T.id, %s)", getValue(id));
+            return String.format(".property(T.id, %s)", transformValue(id));
         }
         return null;
     }
@@ -204,5 +204,19 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         final String label = relevantField.getLabel();
         final Object value = getValue(element, relevantField);
         return String.format(".property(single, \"%s\", %s)", label, value);
+    }
+
+    @Override
+    protected Object transformValue(Object value) {
+        if (value instanceof String) {
+            value = "\"" + ((String) value).replace("\"", "\\\"") + "\"";
+        } else if (value instanceof Double) {
+            value += "d";
+        } else if (value instanceof Long) {
+            value += "L";
+        } else if (value instanceof Enum) {
+            value = "\"" + ((Enum<?>) value).name() + "\"";
+        }
+        return value;
     }
 }
