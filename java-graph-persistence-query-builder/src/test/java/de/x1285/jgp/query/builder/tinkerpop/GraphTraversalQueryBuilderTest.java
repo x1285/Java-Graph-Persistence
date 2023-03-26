@@ -31,14 +31,14 @@ public class GraphTraversalQueryBuilderTest {
         final List<GraphTraversalQuery> result = queryBuilder.add(testData.getAllVertices());
 
         assertNotNull(result);
-        assertEquals(19, result.size());
+        assertEquals(20, result.size());
 
         final List<String> queries = result.stream().map(GraphTraversalQuery::toGremlinScript).collect(Collectors.toList());
         assertEquals(4, queries.stream().filter(x -> x.contains("addV(\"Person\")")).count());
         assertEquals(3, queries.stream().filter(x -> x.contains("addV(\"Place\")")).count());
         assertEquals(2, queries.stream().filter(x -> x.contains("addV(\"Software\")")).count());
         assertEquals(4, queries.stream().filter(x -> x.contains("addE(\"created\")")).count());
-        assertEquals(2, queries.stream().filter(x -> x.contains("addE(\"knows\")")).count());
+        assertEquals(3, queries.stream().filter(x -> x.contains("addE(\"knows\")")).count());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class GraphTraversalQueryBuilderTest {
         final List<GraphTraversalQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(15, result.size());
+        assertEquals(16, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)
@@ -73,7 +73,7 @@ public class GraphTraversalQueryBuilderTest {
         final List<GraphTraversalQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(15, result.size());
+        assertEquals(16, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)

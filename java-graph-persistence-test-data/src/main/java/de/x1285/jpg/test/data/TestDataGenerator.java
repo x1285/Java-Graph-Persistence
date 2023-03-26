@@ -30,6 +30,7 @@ public class TestDataGenerator {
 
         final Place hamburg = new Place("Hamburg");
         vadas.setBirthPlace(hamburg);
+        vadas.knows(josh);
 
         final Place duesseldorf = new Place("Düsseldorf");
         peter.setBirthPlace(duesseldorf);

@@ -27,7 +27,7 @@ public class GraphTraversalQueryTest {
             assertEquals(2, graph.traversal().V().hasLabel("Software").count().next());
             assertEquals(3, graph.traversal().V().hasLabel("Place").count().next());
             assertEquals(4, graph.traversal().V().hasLabel("Person").count().next());
-            assertEquals(10, graph.traversal().E().count().next());
+            assertEquals(11, graph.traversal().E().count().next());
         }
     }
 
