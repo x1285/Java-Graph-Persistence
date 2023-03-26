@@ -31,7 +31,7 @@ public class GremlinScriptQueryBuilderTest {
         final List<GremlinScriptQuery> result = queryBuilder.add(testData.getAllVertices());
 
         assertNotNull(result);
-        assertEquals(16, result.size());
+        assertEquals(24, result.size());
 
         final List<String> queries = result.stream().map(GremlinScriptQuery::getQuery).collect(Collectors.toList());
         assertEquals(4, queries.stream().filter(x -> x.contains("addV(\"Person\")")).count());
@@ -39,6 +39,7 @@ public class GremlinScriptQueryBuilderTest {
         assertEquals(2, queries.stream().filter(x -> x.contains("addV(\"Software\")")).count());
         assertEquals(4, queries.stream().filter(x -> x.contains("addE(\"created\")")).count());
         assertEquals(3, queries.stream().filter(x -> x.contains("addE(\"knows\")")).count());
+        assertEquals(4, queries.stream().filter(x -> x.contains("addE(\"visitedPlaces\")")).count());
     }
 
     @Test
@@ -50,7 +51,7 @@ public class GremlinScriptQueryBuilderTest {
         final List<GremlinScriptQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(14, result.size());
+        assertEquals(21, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)
@@ -73,7 +74,7 @@ public class GremlinScriptQueryBuilderTest {
         final List<GremlinScriptQuery> result = queryBuilder.add(testElementMarko);
 
         assertNotNull(result);
-        assertEquals(14, result.size());
+        assertEquals(21, result.size());
 
         final Optional<String> addQueryMarko = result.stream()
                                                      .filter(query -> query.getElement() == testElementMarko)

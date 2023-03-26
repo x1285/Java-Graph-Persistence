@@ -1,8 +1,10 @@
 package de.x1285.jgp.query.builder.gremlinscript;
 
+import de.x1285.jgp.api.annotation.EdgeDirection;
 import de.x1285.jgp.element.GraphEdge;
 import de.x1285.jgp.element.GraphElement;
 import de.x1285.jgp.element.GraphVertex;
+import de.x1285.jgp.element.SimpleGraphEdge;
 import de.x1285.jgp.metamodel.MetaModel;
 import de.x1285.jgp.metamodel.field.EdgeCollectionField;
 import de.x1285.jgp.metamodel.field.EdgeField;
@@ -34,16 +36,15 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
 
     private void add(GraphElement element, GremlinScriptQueryBuilderContext context) {
         if (!context.wasHandled(element)) {
-            final MetaModel metaModel = context.getMetaModel(element);
             if (element instanceof GraphVertex) {
-                addVertex((GraphVertex) element, context, metaModel);
+                addVertex((GraphVertex) element, context);
             } else if (element instanceof GraphEdge) {
-                addEdge((GraphEdge<?, ?>) element, context, metaModel);
+                addEdge((GraphEdge<?, ?>) element, context);
             }
         }
     }
 
-    private void addVertex(GraphVertex vertex, GremlinScriptQueryBuilderContext context, MetaModel metaModel) {
+    private void addVertex(GraphVertex vertex, GremlinScriptQueryBuilderContext context) {
         final String alias = context.generateAlias();
         final GremlinScriptQuery gremlinScriptQuery = GremlinScriptQuery.of(vertex, alias);
         context.addToResult(gremlinScriptQuery);
@@ -58,6 +59,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
             addQuery.append(idStep);
         }
 
+        final MetaModel metaModel = context.getMetaModel(vertex);
         for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
             if (relevantField instanceof PropertyField) {
                 final String propertyStep = createPropertyStep(vertex, relevantField);
@@ -78,7 +80,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         }
     }
 
-    private void addEdge(GraphEdge<?, ?> edge, GremlinScriptQueryBuilderContext context, MetaModel metaModel) {
+    private void addEdge(GraphEdge<?, ?> edge, GremlinScriptQueryBuilderContext context) {
         final StringBuilder addQuery = new StringBuilder("addE(\"").append(edge.getLabel()).append("\")");
 
         // handle .from and .to
@@ -96,6 +98,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
             addQuery.append(idStep);
         }
 
+        final MetaModel metaModel = context.getMetaModel(edge);
         for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
             if (relevantField instanceof PropertyField) {
                 final String propertyStep = createPropertyStep(edge, relevantField);
@@ -129,18 +132,20 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         return context.getResultFor(element).orElseThrow(() -> new QueryBuilderException(""));
     }
 
-    private void addEdgeCollectionSteps(GraphElement element,
+    private void addEdgeCollectionSteps(GraphVertex vertex,
                                         EdgeCollectionField<?, ?, ?> edgeCollectionField,
                                         GremlinScriptQueryBuilderContext context) {
-        Collection<?> values = edgeCollectionField.getGetter().apply(element);
-        if (values != null) {
-            for (Object value : values) {
-                if (value != null) {
-                    if (value instanceof GraphElement) {
-                        add((GraphElement) value, context);
+        Collection<?> graphElements = edgeCollectionField.getGetter().apply(vertex);
+        if (graphElements != null) {
+            for (Object graphElement : graphElements) {
+                if (graphElement != null) {
+                    if (graphElement instanceof GraphElement) {
+                        addEdgeOfVertexToGraphElement(vertex, (GraphElement) graphElement, edgeCollectionField, context);
                     } else {
                         String message = String.format("Unsupported type %s declared in edge collection at element %s (field %s)",
-                                                       value.getClass(), element.getClass(), edgeCollectionField.getFieldName());
+                                                       graphElement.getClass(),
+                                                       edgeCollectionField.getClass(),
+                                                       edgeCollectionField.getFieldName());
                         throw new QueryBuilderException(message);
                     }
                 }
@@ -148,22 +153,34 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         }
     }
 
-    private void addEdgeSteps(GraphElement element,
-                              EdgeField<?, ?> edgeField,
-                              GremlinScriptQueryBuilderContext context) {
-        Object value = edgeField.getGetter().apply(element);
-        if (value != null) {
-            if (value instanceof GraphVertex) {
-                GraphVertex oppositeElement = (GraphVertex) value;
-                add(oppositeElement, context);
-                // TODO: 02.08.2022 add edge and properties
-            } else if (value instanceof GraphEdge) {
-                // TODO: 02.08.2022 handle rich edge: add edge, vertices and properties
-            } else {
-                String message = String.format("Unsupported type %s declared as edge at element %s (field %s)",
-                                               value.getClass(), element.getClass(), edgeField.getFieldName());
-                throw new QueryBuilderException(message);
-            }
+    protected void addEdgeSteps(GraphVertex vertex,
+                                EdgeField<?, ?> edgeField,
+                                GremlinScriptQueryBuilderContext context) {
+        Object graphElement = edgeField.getGetter().apply(vertex);
+        if (graphElement instanceof GraphElement) {
+            addEdgeOfVertexToGraphElement(vertex, (GraphElement) graphElement, edgeField, context);
+        } else if (graphElement != null) {
+            String message = String.format("Unsupported type %s declared as edge at element %s (field %s)",
+                                           graphElement.getClass(), vertex.getClass(), edgeField.getFieldName());
+            throw new QueryBuilderException(message);
+        }
+    }
+
+    private void addEdgeOfVertexToGraphElement(GraphVertex vertex, GraphElement graphElement, EdgeField<?, ?> edgeField, GremlinScriptQueryBuilderContext context) {
+        if (graphElement instanceof GraphVertex) {
+            GraphVertex oppositeElement = (GraphVertex) graphElement;
+            add(oppositeElement, context);
+
+            GraphVertex outVertex = edgeField.getDirection() == EdgeDirection.OUT ? vertex : oppositeElement;
+            GraphVertex inVertex = edgeField.getDirection() == EdgeDirection.OUT ? oppositeElement : vertex;
+            SimpleGraphEdge<?, ?> edgeElement = new SimpleGraphEdge<>(edgeField.getLabel(), outVertex, inVertex);
+            add(edgeElement, context);
+        } else if (graphElement instanceof GraphEdge) {
+            add(graphElement, context);
+        } else if (graphElement != null) {
+            String message = String.format("Unsupported type %s declared as edge at vertex %s (field %s)",
+                                           graphElement.getClass(), vertex.getClass(), edgeField.getFieldName());
+            throw new QueryBuilderException(message);
         }
     }
 

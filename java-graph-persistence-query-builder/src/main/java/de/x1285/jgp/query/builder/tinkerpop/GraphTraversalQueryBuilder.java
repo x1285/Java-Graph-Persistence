@@ -42,12 +42,12 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
     }
 
     private void add(GraphElement element, GraphTraversalQueryBuilderContext context) {
-        if (context.wasHandled(element)) {
-            return;
-        } else if (element instanceof GraphVertex) {
-            addVertex((GraphVertex) element, context);
-        } else if (element instanceof GraphEdge) {
-            addEdge((GraphEdge<?, ?>) element, context);
+        if (!context.wasHandled(element)) {
+            if (element instanceof GraphVertex) {
+                addVertex((GraphVertex) element, context);
+            } else if (element instanceof GraphEdge) {
+                addEdge((GraphEdge<?, ?>) element, context);
+            }
         }
     }
 
@@ -152,7 +152,9 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
                     addEdgeOfVertexToGraphElement(vertex, (GraphElement) graphElement, edgeCollectionField, context);
                 } else {
                     String message = String.format("Unsupported type %s declared in edge collection at element %s (field %s)",
-                                                   graphElement.getClass(), edgeCollectionField.getClass(), edgeCollectionField.getFieldName());
+                                                   graphElement.getClass(),
+                                                   edgeCollectionField.getClass(),
+                                                   edgeCollectionField.getFieldName());
                     throw new QueryBuilderException(message);
                 }
             }

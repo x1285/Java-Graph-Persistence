@@ -150,13 +150,13 @@ public class Person extends GraphVertex {
 - [ ] Implement first simple QueryBuilder which auto-generates Gremlin insert queries as string:
   - [x] Insert a vertex including all supported properties
   - [x] ... and all other referenced vertices
-  - [ ] ... and all referenced edges including their properties
-  - [ ] Support inserting a collection of vertices
+  - [x] ... and all referenced edges including their properties
+  - [x] Support inserting a collection of vertices
 - [x] Implement first simple QueryBuilder which auto-generates Gremlin insert queries for GraphTraversals:
   - [x] Insert a vertex including all supported properties
   - [x] ... and all other referenced vertices
   - [x] ... and all referenced edges including their properties
-  - [ ] Support inserting a collection of vertices
+  - [x] Support inserting a collection of vertices
 
 ### Reading
 - [ ] Implement first simple mapping from TinkerPop Gremlin Result objects to our Java POJO.
