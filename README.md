@@ -147,7 +147,7 @@ public class Person extends GraphVertex {
 ### Writing
 - [x] Implement API inclusive Annotations to define how Java POJPs should be stored in the graph database.
 - [x] Implement MetaModel and Factory to access during runtime how instances should be stored in the graph database.
-- [ ] Implement first simple QueryBuilder which auto-generates Gremlin insert queries as string:
+- [x] Implement first simple QueryBuilder which auto-generates Gremlin insert queries as string:
   - [x] Insert a vertex including all supported properties
   - [x] ... and all other referenced vertices
   - [x] ... and all referenced edges including their properties
