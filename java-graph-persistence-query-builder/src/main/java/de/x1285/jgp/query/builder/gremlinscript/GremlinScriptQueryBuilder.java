@@ -44,7 +44,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         }
     }
 
-    private void addVertex(GraphVertex vertex, GremlinScriptQueryBuilderContext context) {
+    private <G extends GraphVertex> void addVertex(G vertex, GremlinScriptQueryBuilderContext context) {
         final String alias = context.generateAlias();
         final GremlinScriptQuery gremlinScriptQuery = GremlinScriptQuery.of(vertex, alias);
         context.addToResult(gremlinScriptQuery);
@@ -59,8 +59,8 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
             addQuery.append(idStep);
         }
 
-        final MetaModel metaModel = context.getMetaModel(vertex);
-        for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
+        final MetaModel<G> metaModel = (MetaModel<G>) context.getMetaModel(vertex);
+        for (RelevantField<G, ?, ?> relevantField : metaModel.getRelevantFields()) {
             if (relevantField instanceof PropertyField) {
                 final String propertyStep = createPropertyStep(vertex, relevantField);
                 addQuery.append(propertyStep);
@@ -80,7 +80,7 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
         }
     }
 
-    private void addEdge(GraphEdge<?, ?> edge, GremlinScriptQueryBuilderContext context) {
+    private <G extends GraphEdge<?, ?>> void addEdge(G edge, GremlinScriptQueryBuilderContext context) {
         final StringBuilder addQuery = new StringBuilder("addE(\"").append(edge.getLabel()).append("\")");
 
         // handle .from and .to
@@ -98,8 +98,8 @@ public class GremlinScriptQueryBuilder extends QueryBuilder<List<GremlinScriptQu
             addQuery.append(idStep);
         }
 
-        final MetaModel metaModel = context.getMetaModel(edge);
-        for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
+        final MetaModel<G> metaModel = (MetaModel<G>) context.getMetaModel(edge);
+        for (RelevantField<G, ?, ?> relevantField : metaModel.getRelevantFields()) {
             if (relevantField instanceof PropertyField) {
                 final String propertyStep = createPropertyStep(edge, relevantField);
                 addQuery.append(propertyStep);

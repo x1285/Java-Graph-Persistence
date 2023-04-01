@@ -11,12 +11,12 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(of = "elementClass")
-public class MetaModel {
+public class MetaModel<E extends GraphElement> {
 
-    private final List<RelevantField<? extends GraphElement, ?, ?>> relevantFields;
+    private final List<RelevantField<E, ?, ?>> relevantFields;
     private final Class<? extends GraphElement> elementClass;
 
-    public MetaModel(Class<? extends GraphElement> elementClass, List<RelevantField<?, ?, ?>> relevantFields) {
+    public MetaModel(Class<E> elementClass, List<RelevantField<E, ?, ?>> relevantFields) {
         this.elementClass = elementClass;
         this.relevantFields = relevantFields;
     }

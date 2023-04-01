@@ -34,21 +34,21 @@ public class MetaModelFactory {
 
     private static final HashMap<Class<? extends GraphElement>, List<Field>> CLASS_FIELDS = new HashMap<>();
 
-    public static MetaModel createMetaModel(GraphElement element) {
-        return createMetaModel(element.getClass());
+    public static <E extends GraphElement> MetaModel<E> createMetaModel(E element) {
+        return (MetaModel<E>) createMetaModel(element.getClass());
     }
 
-    public static MetaModel createMetaModel(Class<? extends GraphElement> elementClass) {
+    public static <E extends GraphElement> MetaModel<E> createMetaModel(Class<E> elementClass) {
         List<PropertyDescriptor> pds = preparePropertyDescriptors(elementClass);
-        List<RelevantField<?, ?, ?>> relevantFields = createFields(elementClass, pds);
-        return new MetaModel(elementClass, relevantFields);
+        List<RelevantField<E, ?, ?>> relevantFields = createFields(elementClass, pds);
+        return new MetaModel<E>(elementClass, relevantFields);
     }
 
-    protected static List<RelevantField<?, ?, ?>> createFields(Class<? extends GraphElement> elementClass, List<PropertyDescriptor> pds) {
-        List<RelevantField<?, ?, ?>> relevantFields = new ArrayList<>();
+    protected static <E extends GraphElement> List<RelevantField<E, ?, ?>> createFields(Class<E> elementClass, List<PropertyDescriptor> pds) {
+        List<RelevantField<E, ?, ?>> relevantFields = new ArrayList<>();
         for (PropertyDescriptor pd : pds) {
             final Class<?> type = pd.getPropertyType();
-            RelevantField<?, ?, ?> relevantField = createField(pd, type, elementClass);
+            RelevantField<E, ?, ?> relevantField = createField(pd, type, elementClass);
             if (relevantField != null) {
                 relevantFields.add(relevantField);
             }

@@ -14,7 +14,7 @@ public class TestDataGenerator {
         final Person peter = Person.builder().name("Peter").age(35).build();
 
         final Software lop = Software.builder().name("lop").lang(Language.JAVA).build();
-        final Software ripple = Software.builder().name("ripple").lang(Language.PYHTON).build();
+        final Software ripple = Software.builder().name("ripple").lang(Language.PYTHON).build();
 
         final Place duesseldorf = new Place("Düsseldorf");
         final Place hamburg = new Place("Hamburg");

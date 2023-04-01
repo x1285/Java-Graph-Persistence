@@ -3,6 +3,11 @@ package de.x1285.jgp.result.transformer;
 import de.x1285.jgp.element.GraphEdge;
 import de.x1285.jgp.element.GraphElement;
 import de.x1285.jgp.element.GraphVertex;
+import de.x1285.jgp.metamodel.MetaModel;
+import de.x1285.jgp.metamodel.field.PropertyField;
+import de.x1285.jgp.metamodel.field.RelevantField;
+import de.x1285.jgp.metamodel.provider.CachingMetaModelProvider;
+import de.x1285.jgp.metamodel.provider.MetaModelProvider;
 import de.x1285.jgp.result.transformer.type.resolver.GraphElementLabelToClassResolver;
 import lombok.RequiredArgsConstructor;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -20,8 +25,9 @@ class ResultTransformation {
 
     private final Graph graph;
     private final GraphElementLabelToClassResolver classResolver;
+    private final MetaModelProvider metaModelProvider = new CachingMetaModelProvider();
     private final Map<Object, GraphVertex> verticesCache = new LinkedHashMap<>();
-    private final Map<Object, GraphEdge<?,?>> edgesCache = new LinkedHashMap<>();
+    private final Map<Object, GraphEdge<?, ?>> edgesCache = new LinkedHashMap<>();
 
     List<GraphElement> collectElementsAsList() {
         ArrayList<GraphElement> elementList = new ArrayList<>();
@@ -50,20 +56,6 @@ class ResultTransformation {
         putElement(graphElement);
     }
 
-    private GraphElement createGraphElement(Map<Object, Object> rawResult) {
-        final Object label = rawResult.get(T.label);
-        Class<? extends GraphElement> graphElementClass = classResolver.resolveClass(label);
-        try {
-            GraphElement graphElement = graphElementClass.newInstance();
-            final Object id = rawResult.get(T.id);
-            graphElement.setId(id);
-            return graphElement;
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new ResultTransformationException("Could not instantiate " + graphElementClass
-                                                            + ". No-arg constructor needed for de-/serialization.");
-        }
-    }
-
     private void putElement(GraphElement graphElement) {
         if (graphElement instanceof GraphVertex) {
             verticesCache.put(graphElement.getId(), (GraphVertex) graphElement);
@@ -71,4 +63,38 @@ class ResultTransformation {
             edgesCache.put(graphElement.getId(), (GraphEdge<?, ?>) graphElement);
         }
     }
+
+    private GraphElement createGraphElement(Map<Object, Object> rawResult) {
+        final Object label = rawResult.get(T.label);
+        Class<? extends GraphElement> graphElementClass = classResolver.resolveClass(label);
+        try {
+            GraphElement graphElement = graphElementClass.newInstance();
+            setBeanFields(graphElement, rawResult);
+            return graphElement;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new ResultTransformationException("Could not instantiate " + graphElementClass
+                                                            + ". No-arg constructor needed for de-/serialization.");
+        }
+    }
+
+    private <E extends GraphElement> void setBeanFields(E graphElement, Map<Object, Object> rawResult) {
+        final Object id = rawResult.get(T.id);
+        graphElement.setId(id);
+
+        final MetaModel<E> metaModel = (MetaModel<E>) metaModelProvider.getMetaModel(graphElement.getClass());
+        for (RelevantField<E, ?, ?> field : metaModel.getRelevantFields()) {
+            if (field instanceof PropertyField) {
+                final String label = field.getLabel();
+                final Object value = rawResult.get(label);
+                setField(field, graphElement, value);
+            }
+        }
+    }
+
+    private <E extends GraphElement, T> void setField(RelevantField<E, T, ?> field,
+                                                      E graphElement,
+                                                      Object value) {
+        field.getSetter().accept(graphElement, (T) value);
+    }
+
 }

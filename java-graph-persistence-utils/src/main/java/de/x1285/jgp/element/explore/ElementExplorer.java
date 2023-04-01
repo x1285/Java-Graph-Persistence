@@ -4,8 +4,9 @@ import de.x1285.jgp.element.GraphEdge;
 import de.x1285.jgp.element.GraphElement;
 import de.x1285.jgp.element.GraphVertex;
 import de.x1285.jgp.metamodel.MetaModel;
-import de.x1285.jgp.metamodel.MetaModelFactory;
 import de.x1285.jgp.metamodel.field.EdgeField;
+import de.x1285.jgp.metamodel.provider.CachingMetaModelProvider;
+import de.x1285.jgp.metamodel.provider.MetaModelProvider;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,7 +16,7 @@ import java.util.Set;
 
 public class ElementExplorer {
 
-    private static final HashSet<MetaModel> META_MODEL_CACHE = new HashSet<>();
+    private static final MetaModelProvider META_MODEL_PROVIDER = new CachingMetaModelProvider();
 
     public static Set<? extends GraphElement> collectAllElements(GraphElement element) {
         return collectAllElements(Collections.singleton(element));
@@ -37,11 +38,11 @@ public class ElementExplorer {
         }
     }
 
-    protected static void collectAllElements(GraphElement element, HashSet<GraphElement> result) {
+    protected static <E extends GraphElement> void collectAllElements(E element, HashSet<GraphElement> result) {
         if (element instanceof GraphEdge) {
             collectAllElements((GraphEdge<?, ?>) element, result);
         } else if (element instanceof GraphVertex) {
-            final MetaModel metaModel = getMetaModel(element.getClass());
+            final MetaModel<?> metaModel = META_MODEL_PROVIDER.getMetaModel(element.getClass());
             final GraphVertex vertex = (GraphVertex) element;
             metaModel.getRelevantFields()
                      .stream()
@@ -77,16 +78,5 @@ public class ElementExplorer {
         if (result.add(inVertex)) {
             collectAllElements(inVertex, result);
         }
-    }
-
-    private static MetaModel getMetaModel(Class<? extends GraphElement> elementClass) {
-        for (MetaModel metaModel : META_MODEL_CACHE) {
-            if (metaModel.getElementClass() == elementClass) {
-                return metaModel;
-            }
-        }
-        final MetaModel metaModel = MetaModelFactory.createMetaModel(elementClass);
-        META_MODEL_CACHE.add(metaModel);
-        return metaModel;
     }
 }

@@ -14,7 +14,7 @@ public abstract class QueryBuilderContext<Q extends Query> {
 
     private final AliasGenerator aliasGenerator = new AliasGenerator();
     protected final List<Q> result = new ArrayList<>();
-    protected final HashMap<Class<? extends GraphElement>, MetaModel> metaModelCache = new HashMap<>();
+    protected final HashMap<Class<? extends GraphElement>, MetaModel<GraphElement>> metaModelCache = new HashMap<>();
 
     public List<Q> getResult() {
         return result;
@@ -45,12 +45,12 @@ public abstract class QueryBuilderContext<Q extends Query> {
         return getResultFor(graphElement).isPresent();
     }
 
-    public MetaModel getMetaModel(GraphElement element) {
-        MetaModel cachedMetaModel = metaModelCache.get(element.getClass());
+    public MetaModel<? extends GraphElement> getMetaModel(GraphElement element) {
+        MetaModel<GraphElement> cachedMetaModel = metaModelCache.get(element.getClass());
         if (cachedMetaModel != null) {
             return cachedMetaModel;
         } else {
-            MetaModel metaModel = MetaModelFactory.createMetaModel(element);
+            MetaModel<GraphElement> metaModel = MetaModelFactory.createMetaModel(element);
             metaModelCache.put(element.getClass(), metaModel);
             return metaModel;
         }

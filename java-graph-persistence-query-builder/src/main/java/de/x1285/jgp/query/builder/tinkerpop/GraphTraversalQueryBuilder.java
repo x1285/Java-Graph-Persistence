@@ -52,7 +52,7 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
     }
 
     private void addVertex(GraphVertex vertex, GraphTraversalQueryBuilderContext context) {
-        final MetaModel metaModel = context.getMetaModel(vertex);
+        final MetaModel<?> metaModel = context.getMetaModel(vertex);
         final String alias = context.generateAlias();
         final GraphTraversalQuery graphTraversalQuery = GraphTraversalQuery.of(vertex, alias);
         context.addToResult(graphTraversalQuery);
@@ -80,7 +80,7 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
 
     private Function<Function<String, GraphTraversal<?, ?>>, GraphTraversal<?, ?>>
     addVertexAndProperties(GraphVertex vertex, GraphTraversalQueryBuilderContext context) {
-        final MetaModel metaModel = context.getMetaModel(vertex);
+        final MetaModel<?> metaModel = context.getMetaModel(vertex);
         Function<Function<String, GraphTraversal<?, ?>>, GraphTraversal<?, ?>> addVQuery = g -> g.apply(vertex.getLabel());
         for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
             if (relevantField instanceof PropertyField) {
@@ -116,7 +116,7 @@ public class GraphTraversalQueryBuilder extends QueryBuilder<List<GraphTraversal
                 g -> g.addE(edge.getLabel())
                       .from(__.V(outVertex.getId()))
                       .to(__.V(inVertex.getId()));
-        final MetaModel metaModel = context.getMetaModel(edge);
+        final MetaModel<?> metaModel = context.getMetaModel(edge);
         for (RelevantField<? extends GraphElement, ?, ?> relevantField : metaModel.getRelevantFields()) {
             if (relevantField instanceof PropertyField) {
                 addEQuery = addEQuery.andThen(createPropertyStep(edge, relevantField));
