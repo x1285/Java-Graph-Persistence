@@ -1,6 +1,9 @@
 package de.x1285.jpg.test.data;
 
+import de.x1285.jgp.element.GraphElement;
 import de.x1285.jgp.element.GraphVertex;
+import de.x1285.jpg.test.model.Created;
+import de.x1285.jpg.test.model.Knows;
 import de.x1285.jpg.test.model.Person;
 import de.x1285.jpg.test.model.Place;
 import de.x1285.jpg.test.model.Software;
@@ -34,5 +37,9 @@ public class TestData {
 
     public List<GraphVertex> getAllVertices() {
         return Arrays.asList(marko, josh, vadas, peter, lop, ripple, berlin, hamburg, duesseldorf);
+    }
+
+    public List<Class<? extends GraphElement>> getAllGraphElementClasses() {
+        return Arrays.asList(Created.class, Knows.class, Person.class, Place.class, Software.class);
     }
 }

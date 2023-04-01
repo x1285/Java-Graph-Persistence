@@ -51,7 +51,6 @@ public class ElementExplorer {
                          Object fieldValue = edge.getGetter().apply(vertex);
                          collectAllElements(fieldValue, result);
                      });
-            // TODO: 04.05.2022
         } else {
             throw new IllegalStateException("Unknown GraphElement type " + element.getClass() + " not supported during meta model creation.");
         }

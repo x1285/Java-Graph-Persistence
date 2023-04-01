@@ -3,13 +3,17 @@ package de.x1285.jpg.test.model;
 import de.x1285.jgp.api.annotation.Edge;
 import de.x1285.jgp.api.annotation.Property;
 import de.x1285.jgp.element.GraphVertex;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Getter
 @Setter
