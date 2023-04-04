@@ -123,6 +123,17 @@ public class ResultTransfomerTest {
         }
     }
 
+    @Test
+    void transformAllQueriedVerticesAndEdgesGivesExpectedBeans() {
+        try (final TinkerGraph graph = TinkerGraph.open()) {
+            addTestdataToGraph(graph);
+
+            GraphTraversal<?, Path> rawResult = graph.traversal().V().bothE().bothV().path();
+            List<GraphElement> beans = resultTransformer.toBeans(graph, rawResult);
+            assertEquals(beans.size(), 24);
+        }
+    }
+
     private void registerTestGraphElementClasses(TestData testData) {
         for (Class<? extends GraphElement> clazz : testData.getAllGraphElementClasses()){
             GlobalGraphElementClassRegister.registerClass(clazz);

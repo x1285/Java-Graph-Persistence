@@ -4,12 +4,15 @@ import de.x1285.jgp.element.GraphEdge;
 import de.x1285.jgp.element.GraphElement;
 import de.x1285.jgp.element.GraphVertex;
 import de.x1285.jgp.metamodel.MetaModel;
+import de.x1285.jgp.metamodel.field.EdgeCollectionField;
+import de.x1285.jgp.metamodel.field.EdgeField;
 import de.x1285.jgp.metamodel.field.PropertyField;
 import de.x1285.jgp.metamodel.field.RelevantField;
 import de.x1285.jgp.metamodel.provider.CachingMetaModelProvider;
 import de.x1285.jgp.metamodel.provider.MetaModelProvider;
 import de.x1285.jgp.result.transformer.type.resolver.GraphElementLabelToClassResolver;
 import lombok.RequiredArgsConstructor;
+import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
@@ -19,6 +22,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 class ResultTransformation {
@@ -45,6 +49,8 @@ class ResultTransformation {
         } else if (object instanceof Edge) {
             Edge edge = (Edge) object;
             final Map<Object, Object> elementMap = graph.traversal().E(edge.id()).elementMap().next();
+            // TODO: 02.04.2023 access OUT info + access GraphElement class, get RelevantField + create GraphElement + set RelevantField
+            // TODO: 02.04.2023 if OUT info not suitable: try IN info
             readMap(elementMap);
         } else {
             throw new ResultTransformationException("Unsupported object class " + object.getClass());
@@ -65,8 +71,7 @@ class ResultTransformation {
     }
 
     private GraphElement createGraphElement(Map<Object, Object> rawResult) {
-        final Object label = rawResult.get(T.label);
-        Class<? extends GraphElement> graphElementClass = classResolver.resolveClass(label);
+        Class<? extends GraphElement> graphElementClass = resolveGraphElementClass(rawResult);
         try {
             GraphElement graphElement = graphElementClass.newInstance();
             setBeanFields(graphElement, rawResult);
@@ -75,6 +80,41 @@ class ResultTransformation {
             throw new ResultTransformationException("Could not instantiate " + graphElementClass
                                                             + ". No-arg constructor needed for de-/serialization.");
         }
+    }
+
+    private Class<? extends GraphElement> resolveGraphElementClass(Map<Object, Object> rawResult) {
+        Class<? extends GraphElement> graphElementClass;
+        if (rawResult.containsKey(Direction.OUT) || rawResult.containsKey(Direction.IN)) {
+            graphElementClass = findFieldOfEdgeMapByDirection(rawResult, Direction.OUT)
+                    .orElseGet(() -> findFieldOfEdgeMapByDirection(rawResult, Direction.IN)
+                            .orElseThrow(() -> {
+                                final Object label = rawResult.get(T.label);
+                                return new ResultTransformationException("Field not found for edge " + label
+                                                                                + " for raw result: " + rawResult);
+                            }));
+        } else {
+            final Object label = rawResult.get(T.label);
+            graphElementClass = classResolver.resolveClass(label);
+        }
+        return graphElementClass;
+    }
+
+    private Optional<Class<? extends GraphElement>> findFieldOfEdgeMapByDirection(Map<Object, Object> edgeMap,
+                                                                                  Direction direction) {
+        // get details of the out or in vertex (direction) and search for the field by the label of the edge
+        final Map<Object, Object> vertexMap = (Map<Object, Object>) edgeMap.get(direction);
+        Class<? extends GraphElement> vertexClass = classResolver.resolveClass(vertexMap.get(T.label));
+        MetaModel<? extends GraphElement> vertexMetaModel = metaModelProvider.getMetaModel(vertexClass);
+        final Object label = edgeMap.get(T.label);
+        return vertexMetaModel.findRelevantFieldByLabel(label)
+                              .map(edgeField -> {
+                                  if (edgeField instanceof EdgeCollectionField) {
+                                      return ((EdgeCollectionField<?,?,?>) edgeField).getGenericType();
+                                  } else {
+                                      return ((EdgeField<?,?>) edgeField).getType();
+                                  }
+                              })
+                              .map(clazz -> (Class<? extends GraphElement>) clazz);
     }
 
     private <E extends GraphElement> void setBeanFields(E graphElement, Map<Object, Object> rawResult) {

@@ -160,9 +160,9 @@ public class Person extends GraphVertex {
 
 ### Reading
 - [ ] Implement first simple mapping from TinkerPop Gremlin Result objects to our Java POJO.
-  - [ ] Fetching a vertex including all supported properties
-  - [ ] ... and all others fetched vertices including their properties
-  - [ ] ... and all edges including their properties
+  - [x] Fetching a vertex including all supported properties
+  - [x] ... and all others fetched vertices including their properties
+  - [x] ... and all edges including their properties
   - [ ] ... and set all instance references
 
 Further:

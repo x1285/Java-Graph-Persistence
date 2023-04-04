@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -21,4 +22,7 @@ public class MetaModel<E extends GraphElement> {
         this.relevantFields = relevantFields;
     }
 
+    public Optional<RelevantField<E, ?, ?>> findRelevantFieldByLabel(final Object label) {
+        return relevantFields.stream().filter(f -> label.equals(f.getLabel())).findFirst();
+    }
 }
